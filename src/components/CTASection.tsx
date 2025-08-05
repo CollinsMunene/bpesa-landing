@@ -47,7 +47,7 @@ const CTASection = () => {
             </Button>
             
             <div className="mt-8 text-sm opacity-75">
-              <p>Available on iOS and Android • Agent network in 50+ countries • $0.01 transaction fees</p>
+              <p>Available on iOS and Android • Agent network in 50+ countries • Near Zero transaction fees</p>
             </div>
           </div>
         </div>

@@ -4,7 +4,7 @@ const Header = () => {
   return (
     <header className="w-full py-6 px-4 lg:px-8">
       <nav className="max-w-6xl mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1">
           <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-xl">B</span>
           </div>

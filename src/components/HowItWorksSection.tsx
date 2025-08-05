@@ -1,4 +1,4 @@
-import { Smartphone, Send, CheckCircle } from "lucide-react";
+import { Smartphone, Send, CheckCircle, Search } from "lucide-react";
 
 const steps = [
   {
@@ -7,12 +7,12 @@ const steps = [
     description: "Get started in under 2 minutes. No paperwork, no bank account needed."
   },
   {
-    icon: Send,
+    icon: Search,
     title: "Find an Agent",
     description: "Visit any local Bpesa agent to deposit cash. Our network spans globally with thousands of agents earning liquidity fees."
   },
   {
-    icon: CheckCircle,
+    icon: Send,
     title: "Send Anywhere",
     description: "Send money to any phone number globally. Recipient can withdraw cash at any agent or keep it digital."
   }
