@@ -12,20 +12,20 @@ const HeroSection = () => {
           <div className="text-center lg:text-left">
             <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
               <Zap className="w-4 h-4" />
-              <span>Your money, your freedom</span>
+              <span>Borderless money transfer</span>
             </div>
             
             <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-6">
               Send Money
               <br />
               <span className="bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-                Without Limits
+                Like M-Pesa, Globally
               </span>
             </h1>
             
             <p className="text-xl text-muted-foreground mb-8 max-w-lg mx-auto lg:mx-0">
-              Pay anyone, anywhere in seconds. No banks, no barriers, no high fees. 
-              Just simple, secure payments that put you in control.
+              Send money to anyone with just a phone number. Deposit and withdraw cash 
+              at local agents. Works with any currency, anywhere in the world.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">

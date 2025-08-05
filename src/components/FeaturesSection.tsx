@@ -2,34 +2,34 @@ import { Lock, Users, Coins, Zap, Shield, Globe } from "lucide-react";
 
 const features = [
   {
-    icon: Lock,
-    title: "You Own Your Money",
-    description: "No bank can freeze your account. No government can block your payments. Your keys, your coins, your freedom."
+    icon: Users,
+    title: "Agent Network",
+    description: "Deposit and withdraw cash at thousands of local agents worldwide. Anyone can become an agent and earn from providing liquidity."
   },
   {
     icon: Zap,
-    title: "Lightning Fast",
-    description: "Send money to anyone in seconds, not days. Whether it's across the street or across continents."
-  },
-  {
-    icon: Coins,
-    title: "Stable & Reliable",
-    description: "Built for everyday use with stable currencies like cUSD and USDT. No wild price swings, just dependable value."
-  },
-  {
-    icon: Shield,
-    title: "Simple & Secure",
-    description: "No complicated seed phrases or technical jargon. Just download and start sending money safely."
-  },
-  {
-    icon: Users,
-    title: "Community First",
-    description: "Built by Africans, for Africans. Connect with local agents, merchants, and your community."
+    title: "Instant Transfers",
+    description: "Send money with just a phone number in seconds. No bank accounts, no long forms, no waiting days for transfers."
   },
   {
     icon: Globe,
-    title: "Works Everywhere",
-    description: "Send money to family abroad, pay local merchants, or save for the future - all from one app."
+    title: "Any Currency, Anywhere",
+    description: "Works with USD, EUR, KES, NGN, GHS and more. Powered by stablecoins for reliable value across borders."
+  },
+  {
+    icon: Coins,
+    title: "Ultra-Low Fees",
+    description: "Pay just $0.01 per transaction. No hidden fees, no exchange rate markups, no monthly charges."
+  },
+  {
+    icon: Shield,
+    title: "No Crypto Knowledge Needed",
+    description: "Simple as M-Pesa but works globally. Blockchain technology handles security while you focus on sending money."
+  },
+  {
+    icon: Lock,
+    title: "Decentralized & Secure",
+    description: "Your money, your control. Built on blockchain technology with bank-level security and no single point of failure."
   }
 ];
 
@@ -39,14 +39,14 @@ const FeaturesSection = () => {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            Built for
+            Global Money Transfer
             <span className="bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent ml-3">
-              Real People
+              Made Simple
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            We believe everyone deserves access to simple, secure, and affordable financial tools. 
-            That's why we built Bpesa.
+            Send money across borders as easily as sending a text message. 
+            Our agent network makes cash-in and cash-out available everywhere.
           </p>
         </div>
         

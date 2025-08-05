@@ -2,21 +2,21 @@ import { Star } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Amara Okafor",
-    location: "Lagos, Nigeria",
-    quote: "I used to wait 3 days for my money to reach my family in Ghana. Now it takes 30 seconds. Bpesa changed everything.",
+    name: "Sarah Wanjiku",
+    location: "Agent in Nairobi, Kenya",
+    quote: "I earn $200 monthly as a Bpesa agent. Customers love that they can send money to Dubai or London as easily as to Mombasa.",
     rating: 5
   },
   {
-    name: "David Mutua",
-    location: "Nairobi, Kenya",
-    quote: "No more expensive bank fees eating my small business profits. Bpesa helps me keep more of what I earn.",
+    name: "Ahmed Hassan",
+    location: "Cairo, Egypt",
+    quote: "My brother in Canada sends me money in seconds. I withdraw Egyptian pounds at the agent down the street. No banks needed.",
     rating: 5
   },
   {
-    name: "Fatima Diallo",
-    location: "Dakar, Senegal",
-    quote: "My daughter in France can send me money instantly now. As a mother, this peace of mind is priceless.",
+    name: "Maria Santos",
+    location: "Manila, Philippines",
+    quote: "Working abroad, I can now send pesos to my family instantly. The agent network makes cash pickup so convenient.",
     rating: 5
   }
 ];
@@ -33,7 +33,8 @@ const TestimonialsSection = () => {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            See how Bpesa is helping people across Africa take control of their financial future.
+            Real stories from users and agents in our global network. 
+            From remittances to local payments, Bpesa works everywhere.
           </p>
         </div>
         

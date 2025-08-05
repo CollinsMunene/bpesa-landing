@@ -4,17 +4,17 @@ const steps = [
   {
     icon: Smartphone,
     title: "Download & Sign Up",
-    description: "Get started in under 2 minutes. No paperwork, no long forms. Just your phone number."
+    description: "Get started in under 2 minutes. No paperwork, no bank account needed. Just your phone number."
   },
   {
     icon: Send,
-    title: "Add Money",
-    description: "Top up using mobile money, bank transfer, or visit a local agent in your area."
+    title: "Find an Agent",
+    description: "Visit any local Bpesa agent to deposit cash. Our network spans globally with thousands of agents earning liquidity fees."
   },
   {
     icon: CheckCircle,
-    title: "Send & Receive",
-    description: "Pay anyone instantly with just their phone number. Pay bills, merchants, or send to family."
+    title: "Send Anywhere",
+    description: "Send money to any phone number globally. Recipient can withdraw cash at any agent or keep it digital."
   }
 ];
 
@@ -30,7 +30,8 @@ const HowItWorksSection = () => {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            No technical knowledge required. If you can send a text message, you can use Bpesa.
+            Just like M-Pesa, but works with any currency, anywhere in the world. 
+            Our agent network makes it possible.
           </p>
         </div>
         

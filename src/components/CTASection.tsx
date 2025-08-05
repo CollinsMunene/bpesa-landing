@@ -14,8 +14,8 @@ const CTASection = () => {
               Ready to Take Control?
             </h2>
             <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-              Join thousands of people who've already discovered financial freedom. 
-              Download Bpesa today and start sending money without limits.
+              Join our global network of users and agents. Send money across borders, 
+              earn from providing liquidity, and experience true financial freedom.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -47,7 +47,7 @@ const CTASection = () => {
             </Button>
             
             <div className="mt-8 text-sm opacity-75">
-              <p>Available on iOS and Android • Free to download • $0.01 transaction fees</p>
+              <p>Available on iOS and Android • Agent network in 50+ countries • $0.01 transaction fees</p>
             </div>
           </div>
         </div>
