@@ -30,7 +30,7 @@ const HowItWorksSection = () => {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Just like M-Pesa, but works with any currency, anywhere in the world. 
+            Just like mobile money, but works with any currency, anywhere in the world. 
             Our agent network makes it possible.
           </p>
         </div>
