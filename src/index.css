@@ -17,8 +17,13 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 215 80% 26%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 215 85% 35%;
+    
+    --hero-gradient: linear-gradient(135deg, hsl(215 80% 26%), hsl(215 85% 35%));
+    --feature-gradient: linear-gradient(135deg, hsl(215 20% 95%), hsl(220 20% 98%));
+    --accent-gradient: linear-gradient(90deg, hsl(215 80% 26%), hsl(200 70% 40%));
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
