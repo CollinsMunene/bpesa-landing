@@ -46,10 +46,10 @@ const HeroSection = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <Smartphone className="w-4 h-4 text-primary" />
-                <span>Works offline</span>
+                <span>Multi Currency</span>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-primary font-bold">$0.01</span>
+                <span className="text-primary font-bold">Near Zero</span>
                 <span>transaction fees</span>
               </div>
             </div>
