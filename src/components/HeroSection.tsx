@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Smartphone, Shield, Zap } from "lucide-react";
+import { ArrowRight, Smartphone, Shield, Zap, Banknote, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 
 const HeroSection = () => {
   return (
@@ -45,12 +45,12 @@ const HeroSection = () => {
                 <span>Bank-level security</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Smartphone className="w-4 h-4 text-primary" />
+                <Banknote className="w-4 h-4 text-primary" />
                 <span>Multi Currency</span>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
                 <span className="text-primary font-bold">Near Zero</span>
-                <span>transaction fees</span>
+                <span>fees</span>
               </div>
             </div>
           </div>
@@ -84,19 +84,22 @@ const HeroSection = () => {
                     <p className="text-3xl font-bold text-primary mb-2">$1,234.56</p>
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <p className="text-xs text-green-600">Connected to 47 agents nearby</p>
+                      <p className="text-xs text-green-600"> 47+ agents nearby</p>
                     </div>
                   </div>
                   
                   {/* Quick actions */}
                   <div className="grid grid-cols-2 gap-3 mb-6">
                     <div className="bg-primary text-primary-foreground rounded-xl p-4 text-center shadow-lg">
-                      <div className="w-8 h-8 bg-white/20 rounded-lg mx-auto mb-2"></div>
-                      <p className="text-xs font-medium">Send Money</p>
+                    
+                      <ArrowUpRight size={24} className="w-8 h-8 bg-white/20 rounded-lg mx-auto mb-2" />
+                    
+                      <p className="text-xs font-medium">Send</p>
                     </div>
                     <div className="bg-primary-glow text-primary-foreground rounded-xl p-4 text-center shadow-lg">
-                      <div className="w-8 h-8 bg-white/20 rounded-lg mx-auto mb-2"></div>
-                      <p className="text-xs font-medium">Find Agent</p>
+                      {/* <div className="w-8 h-8 bg-white/20 rounded-lg mx-auto mb-2"></div> */}
+                      <ArrowDownLeft size={24}  className="w-8 h-8 bg-white/20 rounded-lg mx-auto mb-2"/>
+                      <p className="text-xs font-medium">Withdraw</p>
                     </div>
                   </div>
                   
