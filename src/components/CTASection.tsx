@@ -40,7 +40,7 @@ const CTASection = () => {
             <Button 
               variant="outline" 
               size="lg" 
-              className="text-lg px-8 py-3 border-white text-white hover:bg-white hover:text-primary"
+              className="text-lg text-primary px-8 py-3 border-white hover:bg-white hover:text-primary"
             >
               Join Our Waitlist
               <ArrowRight className="w-5 h-5 ml-2" />

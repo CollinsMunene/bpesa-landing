@@ -4,7 +4,7 @@ const steps = [
   {
     icon: Smartphone,
     title: "Download & Sign Up",
-    description: "Get started in under 2 minutes. No paperwork, no bank account needed. Just your phone number."
+    description: "Get started in under 2 minutes. No paperwork, no bank account needed."
   },
   {
     icon: Send,
