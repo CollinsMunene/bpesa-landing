@@ -3,16 +3,16 @@ import { MapPin, Users, DollarSign, Globe, Zap, Shield, TrendingUp, Network, Act
 
 const AgentNetworkSection = () => {
   const [activeTransactions, setActiveTransactions] = useState(0);
-  const [totalEarnings, setTotalEarnings] = useState(2147483);
-  const [agentCount, setAgentCount] = useState(12847);
+  // const [totalEarnings, setTotalEarnings] = useState(2147483);
+  // const [agentCount, setAgentCount] = useState(12847);
   const [pulseNodes, setPulseNodes] = useState(new Set());
 
   // Simulate real-time activity
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveTransactions(prev => Math.max(0, prev + Math.floor(Math.random() * 3) - 1));
-      setTotalEarnings(prev => prev + Math.floor(Math.random() * 50));
-      setAgentCount(prev => prev + Math.floor(Math.random() * 5) - 2);
+      // setTotalEarnings(prev => prev + Math.floor(Math.random() * 50));
+      // setAgentCount(prev => prev + Math.floor(Math.random() * 5) - 2);
       
       // Random node pulse animation
       const nodeIndex = Math.floor(Math.random() * 12);
@@ -48,7 +48,7 @@ const AgentNetworkSection = () => {
       layer,
       earnings: Math.floor(Math.random() * 500) + 100,
       transactions: Math.floor(Math.random() * 50) + 10,
-      country: ['🇰🇪', '🇳🇬', '🇬🇭', '🇺🇬', '🇹🇿', '🇷🇼'][Math.floor(Math.random() * 6)]
+      country: ['🇰🇪', '🇳🇬', '🇬🇭', '🇺🇬', '🇹🇿', '🇷🇼', '🇺🇸', '🇬🇧', '🇩🇪', '🇫🇷', '🇪🇸', '🇮🇹', '🇳🇱', '🇸🇪', '🇨🇦', '🇦🇺'][Math.floor(Math.random() * 16)]
     };
   });
 
@@ -147,14 +147,14 @@ const AgentNetworkSection = () => {
                       <div className="text-2xl">{node.country}</div>
                       
                       {/* Earnings indicator */}
-                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-2 py-1 rounded text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      {/* <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-2 py-1 rounded text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                         ${node.earnings}/day
-                      </div>
+                      </div> */}
                       
                       {/* Transaction count */}
-                      <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                      {/* <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">
                         {node.transactions} tx
-                      </div>
+                      </div> */}
 
                       {/* Activity pulse */}
                       {isPulsing && (
@@ -224,7 +224,7 @@ const AgentNetworkSection = () => {
               </h3>
               <p className="text-xl text-slate-300 leading-relaxed">
                 Join thousands earning daily commissions by providing liquidity to your community. 
-                No technical knowledge required—just cash and a smartphone.
+                No technical knowledge required, just cash and a smartphone.
               </p>
             </div>
 
@@ -238,7 +238,7 @@ const AgentNetworkSection = () => {
                 {
                   icon: Zap,
                   title: "Instant Settlements",
-                  description: "Earn 0.3-1.2% per transaction with instant stablecoin settlement. No waiting periods or complex withdrawal processes."
+                  description: "Earn 0.5-1.2% per transaction with instant settlement. No waiting periods or complex withdrawal processes."
                 },
                 {
                   icon: TrendingUp,
@@ -308,7 +308,7 @@ const AgentNetworkSection = () => {
                 <div className="w-full bg-slate-700 rounded-full h-2 mb-2">
                   <div className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full w-3/4"></div>
                 </div>
-                <p className="text-xs text-slate-400">75% deployed • Optimal utilization</p>
+                <p className="text-xs text-slate-400">Optimal earning</p>
               </div>
             </div>
 

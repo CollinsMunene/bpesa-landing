@@ -9,22 +9,22 @@ const features = [
   {
     icon: Zap,
     title: "Instant Transfers",
-    description: "Send money with just a phone number in seconds. No bank accounts, no long forms, no waiting days for transfers."
+    description: "Send money with just a phone number in seconds. No Telcos, No bank accounts, no long forms, no waiting days for transfers."
   },
   {
     icon: Globe,
     title: "Any Currency, Anywhere",
-    description: "Works with USD, EUR, KES, NGN, GHS and more. Powered by stablecoins for reliable value across borders."
+    description: "Works with USD, EUR, KES, NGN, GHS and more across borders."
   },
   {
     icon: Coins,
     title: "Ultra-Low Fees",
-    description: "Pay just $0.01 per transaction. No hidden fees, no exchange rate markups, no monthly charges."
+    description: "No hidden fees, no exchange rate markups, no monthly charges."
   },
   {
     icon: Shield,
-    title: "No Crypto Knowledge Needed",
-    description: "Simple as M-Pesa but works globally. Blockchain technology handles security while you focus on sending money."
+    title: "No Technicalities Needed",
+    description: "Simple and works globally. Blockchain technology handles security while you focus on sending money."
   },
   {
     icon: Lock,

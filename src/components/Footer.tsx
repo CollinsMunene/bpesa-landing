@@ -16,13 +16,13 @@ const Footer = () => {
               Empowering financial freedom for everyone. Built with love in Africa, for the world.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
+              <a href="https://x.com/Bpesa1" className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
                 <Twitter className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
+              {/* <a href="#" className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
                 <Github className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
+              </a> */}
+              <a href="mailto:collinshillary1@gmail.com" className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
                 <Mail className="w-5 h-5" />
               </a>
             </div>
@@ -33,7 +33,7 @@ const Footer = () => {
             <ul className="space-y-2 text-muted-foreground">
               <li><a href="#" className="hover:text-primary transition-colors">Features</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Security</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Pricing</a></li>
+              <li><a href="#" className="hover:text-primary transition-colors">Fees Table</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">API</a></li>
             </ul>
           </div>
@@ -43,7 +43,7 @@ const Footer = () => {
             <ul className="space-y-2 text-muted-foreground">
               <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Community</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Contact Us</a></li>
+              <li><a href="mailto:collinshillary1@gmail.com" className="hover:text-primary transition-colors">Contact Us</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Privacy Policy</a></li>
             </ul>
           </div>
