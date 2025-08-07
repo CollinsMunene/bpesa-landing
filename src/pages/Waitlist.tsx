@@ -41,7 +41,7 @@ const Waitlist = () => {
 
     try {
       // Send to our BPESA whitelist API
-      const response = await fetch('http://localhost:8000/send-whitelist-email', {
+      const response = await fetch('https://rafiki-launchpad.devligence.com/bpesa/send-whitelist-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
