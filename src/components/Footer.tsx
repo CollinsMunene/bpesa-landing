@@ -22,7 +22,7 @@ const Footer = () => {
               {/* <a href="#" className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
                 <Github className="w-5 h-5" />
               </a> */}
-              <a href="mailto:collinshillary1@gmail.com" className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
+              <a href="mailto:info@bpesa.net" className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
                 <Mail className="w-5 h-5" />
               </a>
             </div>
@@ -43,7 +43,7 @@ const Footer = () => {
             <ul className="space-y-2 text-muted-foreground">
               <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Community</a></li>
-              <li><a href="mailto:collinshillary1@gmail.com" className="hover:text-primary transition-colors">Contact Us</a></li>
+              <li><a href="mailto:info@bpesa.net" className="hover:text-primary transition-colors">Contact Us</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Privacy Policy</a></li>
             </ul>
           </div>
