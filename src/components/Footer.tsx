@@ -45,6 +45,8 @@ const Footer = () => {
               <li><a href="#" className="hover:text-primary transition-colors">Community</a></li>
               <li><a href="mailto:info@bpesa.net" className="hover:text-primary transition-colors">Contact Us</a></li>
               <li><a href="/privacy-policy.html" className="hover:text-primary transition-colors">Privacy Policy</a></li>
+              <p id="account_deletion"></p>
+              <li><a href="mailto:support@bpesa.net" className="hover:text-primary transition-colors">Request Account deletion</a></li>
             </ul>
           </div>
         </div>
