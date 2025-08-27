@@ -41,7 +41,7 @@ const Waitlist = () => {
 
     try {
       // Send to our BPESA whitelist API
-      const response = await fetch('https://api.bpesa.net/api/v1/send-whitelist-email', {
+      const response = await fetch('https://api.bpesa.net/api/v1/send-waitlist-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
