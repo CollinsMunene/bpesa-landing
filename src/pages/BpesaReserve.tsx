@@ -115,6 +115,8 @@ export default function AgentDepositPage() {
       const usdc = new ethers.Contract(USDC_CONTRACT, ERC20_ABI, signer);
       const treasury = new ethers.Contract(RESERVE_CONTRACT, TREASURY_ABI, signer);
 
+      // const toBkesSend = (depositAmount * usdToKes)
+
       const amountWei = ethers.parseUnits(depositAmount, 6);
 
       // check allowance
@@ -377,7 +379,10 @@ export default function AgentDepositPage() {
                       <div className="flex justify-between text-sm">
                         <span>You will receive:</span>
                         <span className="font-medium">
-                          {depositAmount && isAmountValid ? `${depositAmount} bKES` : "0 bKES"}
+                          {depositAmount && isAmountValid 
+                            ? `${(Number(depositAmount) * usdToKes).toFixed(5)} bKES` 
+                            : "0 bKES"}
+
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
