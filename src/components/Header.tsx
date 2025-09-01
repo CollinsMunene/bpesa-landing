@@ -13,14 +13,14 @@ const Header = () => {
         </div>
         
         <div className="hidden md:flex items-center space-x-8">
-          <a href="#features" className="text-foreground hover:text-primary transition-colors">
+          <a href="/#features" className="text-foreground hover:text-primary transition-colors">
             Features
           </a>
-          <a href="#security" className="text-foreground hover:text-primary transition-colors">
+          {/* <a href="#security" className="text-foreground hover:text-primary transition-colors">
             Security
-          </a>
-          <a href="#community" className="text-foreground hover:text-primary transition-colors">
-            Community
+          </a> */}
+          <a href="/transaction_bands" className="text-foreground hover:text-primary transition-colors">
+            Transaction Bands
           </a>
         </div>
         

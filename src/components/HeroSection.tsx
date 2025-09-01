@@ -39,7 +39,11 @@ const HeroSection = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button variant="hero" size="lg" className="text-lg px-8 py-3">
+              <Button variant="hero" size="lg" className="text-lg px-8 py-3" 
+              onClick={() => {
+                  const section = document.getElementById("CTA");
+                  section?.scrollIntoView({ behavior: "smooth" });
+                }}>
                 Download App
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>

@@ -8,6 +8,7 @@ import Waitlist from "./pages/Waitlist";
 import NotFound from "./pages/NotFound";
 import BpesaReserve from "./pages/BpesaReserve";
 import { Web3Provider } from "./providers";
+import TransactionFees from "./pages/TransactionFee";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/waitlist" element={<Waitlist />} />
+          <Route path="/transaction_bands" element={<TransactionFees />} />
           <Route path="/superagent/float" element={<BpesaReserve />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
