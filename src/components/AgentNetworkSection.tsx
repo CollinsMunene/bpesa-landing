@@ -238,7 +238,7 @@ const AgentNetworkSection = () => {
                 {
                   icon: Zap,
                   title: "Instant Settlements",
-                  description: "Earn 0.5-1.2% per transaction with instant settlement. No waiting periods or complex withdrawal processes."
+                  description: "Earn 0.5-1% per transaction with instant settlement. No waiting periods or complex withdrawal processes."
                 },
                 {
                   icon: TrendingUp,

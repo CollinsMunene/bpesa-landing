@@ -48,7 +48,7 @@ const HeroSection = () => {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
 
-              <Link to="/waitlist">
+              {/* <Link to="/waitlist">
                 <Button
                   variant="outline-hero"
                   size="lg"
@@ -56,7 +56,7 @@ const HeroSection = () => {
                 >
                   Join Waitlist
                 </Button>
-              </Link>
+              </Link> */}
             </div>
 
             {/* Trust indicators */}

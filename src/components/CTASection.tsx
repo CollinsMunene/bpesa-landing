@@ -21,14 +21,16 @@ const CTASection = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-              <Button
+              {/* <Button
                 variant="secondary"
                 size="lg"
                 className="text-lg px-8 py-3 bg-white text-primary hover:bg-white/90"
               >
                 <Download className="w-5 h-5 mr-2" />
                 Download for iOS
-              </Button>
+              </Button> */}
+              
+              <Link to="https://play.google.com/store/apps/details?id=com.devligence.bpesa_main" target="_blank" rel="noopener noreferrer">
               <Button
                 variant="secondary"
                 size="lg"
@@ -37,9 +39,10 @@ const CTASection = () => {
                 <Download className="w-5 h-5 mr-2" />
                 Download for Android
               </Button>
+              </Link>
             </div>
 
-            <Link to="/waitlist">
+            {/* <Link to="/waitlist">
               <Button
                 variant="outline"
                 size="lg"
@@ -48,11 +51,11 @@ const CTASection = () => {
                 Join Our Waitlist
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-            </Link>
+            </Link> */}
 
             <div className="mt-8 text-sm opacity-75">
               <p>
-                Available on iOS and Android • Agent network in 50+ countries •
+                Available on Android • iOS coming soon • Agent network in 50+ countries •
                 Near Zero transaction fees
               </p>
             </div>
