@@ -148,6 +148,8 @@ export default function AgentDepositPage() {
     }
   }
 
+  console.log("inserted amount:", depositAmount);
+
   function formatAddress(addr) {
     if (!addr) return "";
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -164,6 +166,9 @@ export default function AgentDepositPage() {
   const depositValue = parseFloat(depositAmount || "0");
   const hasBalance = balanceValue > 0;
   const isAmountValid = depositValue > 0 && depositValue <= balanceValue;
+  console.log("balanceValue", balanceValue);
+  console.log("depositValue", depositValue);
+  console.log("is valid", isAmountValid);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">

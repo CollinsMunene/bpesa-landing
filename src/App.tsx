@@ -23,7 +23,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/waitlist" element={<Waitlist />} />
           <Route path="/transaction_bands" element={<TransactionFees />} />
-          {/* <Route path="/superagent/float" element={<BpesaReserve />} /> */}
+          <Route path="/superagent/float" element={<BpesaReserve />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
