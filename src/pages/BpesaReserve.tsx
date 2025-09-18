@@ -15,14 +15,40 @@ const USDC_CONTRACT = "0x06efdbff2a14a7c8e15944d1f4a48f9f95f663a4";
 const BKES_CONTRACT = "0xd62fBDd984241BcFdEe96915b43101912a9fcE69";
 
 // Contract ABIs
-const TREASURY_ABI = [
+const RESERVE_ABI = [
   {
-    "inputs": [{"internalType": "address", "name": "token", "type": "address"}, {"internalType": "uint256", "name": "amount", "type": "uint256"}],
+    "inputs": [
+      {"internalType": "address", "name": "token", "type": "address"}, 
+      {"internalType": "uint256", "name": "amount", "type": "uint256"}
+    ],
     "name": "deposit",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
-  }
+  },
+   {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        }
+      ],
+      "name": "depositTo",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
 ];
 
 const ESCROW_ABI = [
@@ -124,6 +150,12 @@ export default function AgentDepositPage() {
       setErrorMessage("Please enter a valid amount greater than 0");
       return;
     }
+    // --- Validate To Address ---
+    if (!toAddress || !ethers.isAddress(toAddress)) {
+      setErrorMessage("Please enter a valid recipient address.");
+      return;
+    }
+    // --- End validation ---
 
     const depositValue = parseFloat(depositAmount);
     const balanceValue = parseFloat(usdcBalance?.formatted || "0");
@@ -148,7 +180,7 @@ export default function AgentDepositPage() {
       const signer = await provider.getSigner();
 
       const usdc = new ethers.Contract(USDC_CONTRACT, ERC20_ABI, signer);
-      const treasury = new ethers.Contract(RESERVE_CONTRACT, TREASURY_ABI, signer);
+      const reserve = new ethers.Contract(RESERVE_CONTRACT, RESERVE_ABI, signer);
 
       // const toBkesSend = (depositAmount * usdToKes)
 
@@ -162,7 +194,7 @@ export default function AgentDepositPage() {
       }
 
       // deposit
-      const depositTx = await treasury.deposit(USDC_CONTRACT, amountWei);
+      const depositTx = await reserve.depositTo(USDC_CONTRACT, amountWei,toAddress);
       await depositTx.wait();
 
       setDepositStatus("success");
@@ -266,6 +298,21 @@ export default function AgentDepositPage() {
     }
   }
 
+  // --- Add To Address state and logic ---
+  const [toAddress, setToAddress] = useState(address || "");
+
+  useEffect(() => {
+    // Get ?toaddress from URL if present
+    const params = new URLSearchParams(window.location.search);
+    const param = params.get("toaddress");
+    if (param && ethers.isAddress(param)) {
+      setToAddress(param);
+    } else if (address) {
+      setToAddress(address);
+    }
+  }, [address]);
+  // --- End To Address logic ---
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
       <div className="container mx-auto px-4 py-8">
@@ -287,7 +334,7 @@ export default function AgentDepositPage() {
             >
               Agent Loader
             </button>
-            <button
+            {/* <button
               className={`px-6 py-2 rounded-t-lg font-semibold border-b-2 transition-colors ${
                 activeTab === "liquidity"
                   ? "border-primary text-primary bg-white"
@@ -296,7 +343,7 @@ export default function AgentDepositPage() {
               onClick={() => setActiveTab("liquidity")}
             >
               Liquidity Locker
-            </button>
+            </button> */}
           </div>
 
           {/* Tab Content */}
@@ -504,6 +551,24 @@ export default function AgentDepositPage() {
                           )}
                         </div>
 
+                        {/* --- To Address Field --- */}
+                        <div className="space-y-2">
+                          <Label htmlFor="to-address">To Address</Label>
+                          <Input
+                            id="to-address"
+                            type="text"
+                            placeholder="Recipient wallet address"
+                            value={toAddress}
+                            onChange={(e) => setToAddress(e.target.value)}
+                            className="pl-8"
+                            autoComplete="off"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            By default, this is your connected wallet. You can send to another address.
+                          </p>
+                        </div>
+                        {/* --- End To Address Field --- */}
+
                         <div className="bg-muted/50 rounded-lg p-4">
                           <div className="flex justify-between text-sm">
                             <span>You will receive:</span>
@@ -511,7 +576,6 @@ export default function AgentDepositPage() {
                               {depositAmount && isAmountValid 
                                 ? `${(Number(depositAmount) * usdToKes).toFixed(5)} bKES` 
                                 : "0 bKES"}
-
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
