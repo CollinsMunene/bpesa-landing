@@ -52,7 +52,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-border mt-12 pt-8 text-center text-muted-foreground">
-          <p>&copy; 2025 Bpesa. Bpesa is a product of Konfinite Ltd, a registered company in Kenya.</p>
+          <p>&copy; 2025 Bpesa. Bpesa is a product of Byte Pesa Ltd, a registered company in Kenya.</p>
         </div>
       </div>
     </footer>

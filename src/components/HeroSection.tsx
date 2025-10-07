@@ -33,8 +33,8 @@ const HeroSection = () => {
             </h1>
 
             <p className="text-xl text-muted-foreground mb-8 max-w-lg mx-auto lg:mx-0">
-              Send money to anyone with just a phone number. Deposit and
-              withdraw cash at local agents. Works with any currency, anywhere
+              Send money to anyone. Deposit and
+              withdraw cash at local agents. Earn Commissions as you move. Works with any currency, anywhere
               in the world.
             </p>
 
@@ -106,8 +106,8 @@ const HeroSection = () => {
                     <p className="text-sm text-muted-foreground mb-2">
                       Total Balance
                     </p>
-                    <p className="text-3xl font-bold text-primary mb-2">
-                      $1,234.56
+                    <p className="text-2xl font-bold text-primary mb-2">
+                      Ksh 1,234.56
                     </p>
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>

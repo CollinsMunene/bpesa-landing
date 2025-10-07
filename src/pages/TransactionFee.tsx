@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowLeft, CreditCard, Send, Download, Upload, ShoppingCart, Phone, AlertCircle } from "lucide-react";
 import Header from "@/components/Header";
 import ChatSidebar from "@/components/ChatSidebar";
+import { withdraw } from "viem/zksync";
 
 
 const TransactionFees = () => {
@@ -24,6 +25,57 @@ const TransactionFees = () => {
       { range: "1+", fee: "$1" }
     ]
   };
+
+  const merchantFees = {
+    KES: [
+      { range: "1 - 49", payfee: "KES 0" },
+      { range: "50 - 100", payfee: "KES 0"},
+      { range: "101 - 500", payfee: "KES 5" },
+      { range: "501 - 1,000", payfee: "KES 10" },
+      { range: "1,001 - 1,500", payfee: "KES 15"},
+      { range: "1,501 - 2,500", payfee: "KES 20" },
+      { range: "2,501 - 3,500", payfee: "KES 25" },
+      { range: "3,501 - 5,000", payfee: "KES 34" },
+      { range: "5,001 - 7,500", payfee: "KES 42" },
+      { range: "7,501 - 10,000", payfee: "KES 48" },
+      { range: "10,001 - 15,000", payfee: "KES 57" },
+      { range: "15,001 - 20,000", payfee: "KES 62" },
+      { range: "20,001 - 25,000", payfee: "KES 67" },
+      { range: "25,001 - 30,000", payfee: "KES 72" },
+      { range: "30,001 - 35,000", payfee: "KES 83" },
+      { range: "35,001 - 40,000", payfee: "KES 99" },
+      { range: "40,001 - 45,000", payfee: "KES 103" },
+      { range: "45,001 - 50,000", payfee: "KES 108" },
+      { range: "50,001 - 70,000", payfee: "KES 108" },
+      { range: "70,001 - 250,000", payfee: "KES 108" },
+    ],
+
+    USD: [
+      { range: "1+", payfee: "Work in progress" }
+    ]
+  };
+  const withdrawFees = {
+    KES: [
+      { range: "50 - 100", withdrawalFee: "KES 11", agentCommission: "KES 11" },       // 5 + 6
+      { range: "101 - 500", withdrawalFee: "KES 29", agentCommission: "KES 18" },      // 9 + 9
+      { range: "501 - 1,000", withdrawalFee: "KES 29", agentCommission: "KES 21" },    // 10 + 11
+      { range: "1,001 - 1,500", withdrawalFee: "KES 29", agentCommission: "KES 24" },  // 11 + 13
+      { range: "1,501 - 2,500", withdrawalFee: "KES 29", agentCommission: "KES 28" },  // 12 + 16
+      { range: "2,501 - 3,500", withdrawalFee: "KES 52", agentCommission: "KES 34" },  // 13 + 21
+      { range: "3,501 - 5,000", withdrawalFee: "KES 69", agentCommission: "KES 41" },  // 15 + 26
+      { range: "5,001 - 7,500", withdrawalFee: "KES 87", agentCommission: "KES 52" },  // 21 + 31
+      { range: "7,501 - 10,000", withdrawalFee: "KES 115", agentCommission: "KES 65" },// 29 + 36
+      { range: "10,001 - 15,000", withdrawalFee: "KES 167", agentCommission: "KES 87" },// 41 + 46
+      { range: "15,001 - 20,000", withdrawalFee: "KES 185", agentCommission: "KES 117" },// 56 + 61
+      { range: "20,001 - 35,000", withdrawalFee: "KES 197", agentCommission: "KES 157" },// 88 + 69
+      { range: "35,001 - 50,000", withdrawalFee: "KES 278", agentCommission: "KES 280" },// 136 + 144
+      { range: "50,001 - 150,000", withdrawalFee: "KES 309", agentCommission: "KES 379" },// 178 + 201
+    ],
+    USD: [
+      { range: "1+", withdrawalFee: "work in progress", agentCommission: "work in progress" }
+    ]
+  };
+
 
   // Withdrawal and Deposit Fees (Bank/Mobile Money vs Agent)
   // const withdrawalFees = {
@@ -110,7 +162,7 @@ const TransactionFees = () => {
       icon: Upload,
       title: "Deposit Fees",
       description: "Add money to your Bpesa wallet through various channels",
-      status: "Coming Soon"
+      status: "Free"
     },
     {
       icon: Phone,
@@ -161,7 +213,7 @@ const TransactionFees = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Send className="w-5 h-5 mr-2" />
-                Transfer Fees - {selectedCurrency}
+                Bpesa Users Transfer Fees - {selectedCurrency}
               </CardTitle>
               <CardDescription>
                 Send money directly to other Bpesa users with our competitive rates
@@ -189,7 +241,77 @@ const TransactionFees = () => {
             </CardContent>
           </Card>
 
-          <div className="mb-8">
+        {/* Withdraw Transfer Fees */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Send className="w-5 h-5 mr-2" />
+                Bpesa User withdraw & Agent commissions - {selectedCurrency}
+              </CardTitle>
+              <CardDescription>
+                Withdraw money from your Bpesa account via Bpesa Agents
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-4 font-semibold">Transaction Amount</th>
+                      <th className="text-left py-3 px-4 font-semibold"> Withdrawal Fee</th>
+                      <th className="text-left py-3 px-4 font-semibold">Agent Commission</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {withdrawFees[selectedCurrency].map((fee, index) => (
+                      <tr key={index} className={index % 2 === 0 ? "bg-muted/50" : ""}>
+                        <td className="py-3 px-4">{fee.range}</td>
+                        <td className="py-3 px-4 font-medium text-primary">{fee.withdrawalFee}</td>
+                        <td className="py-3 px-4 font-medium text-primary">{fee.agentCommission}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+           {/* Merchant Transfer Fees */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Send className="w-5 h-5 mr-2" />
+                Pay Goods & Services - {selectedCurrency}
+              </CardTitle>
+              <CardDescription>
+                Pay for goods and services using Bpesa at registered merchants via Bpay
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-4 font-semibold">Transaction Amount</th>
+                      <th className="text-left py-3 px-4 font-semibold">Fee</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {merchantFees[selectedCurrency].map((fee, index) => (
+                      <tr key={index} className={index % 2 === 0 ? "bg-muted/50" : ""}>
+                        <td className="py-3 px-4">{fee.range}</td>
+                        <td className="py-3 px-4 font-medium text-primary">{fee.payfee}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+
+
+          {/* <div className="mb-8">
                 <h2 className="text-2xl font-bold mb-6 text-center">Additional Features</h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   {inProgressFeatures.map((feature, index) => {
@@ -197,6 +319,7 @@ const TransactionFees = () => {
                     return (
                       <Card key={index} className="relative overflow-hidden">
                         <div className="absolute top-4 right-4">
+                          
                           <div className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium flex items-center">
                             <AlertCircle className="w-3 h-3 mr-1" />
                             {feature.status}
@@ -215,7 +338,7 @@ const TransactionFees = () => {
                     );
                   })}
                 </div>
-              </div>
+              </div> */}
 
           {/* Fee Information */}
           <Card className="mb-8">
@@ -242,7 +365,6 @@ const TransactionFees = () => {
                   <ul className="space-y-1 text-sm text-muted-foreground">
                     <li>• All fees are clearly displayed before confirmation</li>
                     <li>• No hidden charges or surprise fees</li>
-                    <li>• Percentage fees are calculated on transaction amount</li>
                     <li>• Exchange rates updated in real-time</li>
                     <li>• Free deposits across all currencies</li>
                   </ul>
@@ -273,7 +395,7 @@ const TransactionFees = () => {
           </p>
         </div>
       </div>
-      <ChatSidebar />
+      {/* <ChatSidebar /> */}
     </div>
   );
 };

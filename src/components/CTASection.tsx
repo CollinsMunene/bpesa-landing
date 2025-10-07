@@ -37,7 +37,18 @@ const CTASection = () => {
                 className="text-lg px-8 py-3 bg-white text-primary hover:bg-white/90"
               >
                 <Download className="w-5 h-5 mr-2" />
-                Download for Android
+                Download User App (Android)
+              </Button>
+              </Link>
+
+              <Link to="https://play.google.com/store/apps/details?id=com.devligence.bpesa_agent" target="_blank" rel="noopener noreferrer">
+              <Button
+                variant="secondary"
+                size="lg"
+                className="text-lg px-8 py-3 bg-white text-primary hover:bg-white/90"
+              >
+                <Download className="w-5 h-5 mr-2" />
+                Download Agent App (Android)
               </Button>
               </Link>
             </div>
