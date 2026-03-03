@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bpesa — Transaction Flow Diagrams</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f4f6f9; --white:#ffffff; --border:#dde3ed; --text:#050a18; --muted:#6b7a99;
+    --teal:#00a88a; --teal-light:#e6f7f4;
+    --blue:#2563eb; --blue-light:#eff4ff;
+    --amber:#d97706; --amber-light:#fef3e2;
+    --purple:#7c3aed; --purple-light:#f3effe;
+    --pink:#db2777; --pink-light:#fdf0f6;
+    --green:#16a34a; --green-light:#f0faf3;
+    --orange:#ea580c; --orange-light:#fff4ee;
+    --indigo:#4338ca; --indigo-light:#eef2ff;
+    --lane-h:94px; --primary-blue: #0d4ba0;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--text); padding:32px; }
+
+  .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; }
+  .logo { font-size:26px; font-weight:700; color:var(--primary-blue); letter-spacing:-0.5px; }
+  .logo span { color:var(--text); }
+  .page-title { font-size:14px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:2px; }
+  .flow-badge { font-size:10px; font-family:'DM Mono',monospace; padding:3px 8px; border-radius:4px; font-weight:500; }
+
+  .flow-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:28px; }
+  .tab { padding:8px 16px; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; border:1.5px solid var(--border); background:var(--white); color:var(--muted); transition:all 0.2s; white-space:nowrap; }
+  .tab:hover { border-color:var(--teal); color:var(--teal); }
+  .tab.active { background:var(--primary-blue); color:#fff; border-color:var(--primary-blue); }
+
+  .flow-panel { display:none; }
+  .flow-panel.active { display:block; }
+
+  .flow-header { background:var(--white); border:1px solid var(--border); border-radius:12px 12px 0 0; padding:18px 24px; display:flex; align-items:center; gap:16px; border-bottom:none; }
+  .flow-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+  .flow-title { font-size:18px; font-weight:700; }
+  .flow-subtitle { font-size:12px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:2px; }
+
+  .swimlane-wrap { background:var(--white); border:1px solid var(--border); border-radius:0 0 12px 12px; overflow-x:auto; }
+  .swimlane-diagram { min-width:1080px; position:relative; }
+
+  /* Lane group headers for Bpesa split */
+  .lane-group-header {
+    background:#f0f4ff;
+    border-bottom:1px solid var(--border);
+    border-left:4px solid var(--indigo);
+    padding:5px 14px 5px 170px;
+    font-size:10px;
+    font-family:'DM Mono',monospace;
+    font-weight:600;
+    color:var(--indigo);
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+  }
+  .lane-group-header.orange { background:#fff8f5; border-left-color:var(--orange); color:var(--orange); }
+
+  .lane { display:flex; align-items:center; min-height:var(--lane-h); border-bottom:1px solid var(--border); position:relative; }
+  .lane:last-child { border-bottom:none; }
+
+  /* Lane label left column */
+  .lane-label { width:170px; min-width:170px; padding:0 14px; display:flex; flex-direction:column; gap:3px; border-right:2px solid var(--border); align-self:stretch; justify-content:center; background:#fafbfc; }
+  .lane-label.bpesa-backend { background:#f5f7ff; border-right-color:#c7d2fe; }
+  .lane-label.bpesa-chain { background:#eef4ff; border-right-color:#a5b4fc; }
+  .lane-label-icon { font-size:16px; margin-bottom:2px; }
+  .lane-label-name { font-size:11px; font-weight:700; color:var(--text); line-height:1.3; }
+  .lane-label-sub { font-size:9.5px; color:var(--muted); font-family:'DM Mono',monospace; line-height:1.4; }
+  .lane-label-tag { font-size:9px; font-family:'DM Mono',monospace; padding:1px 5px; border-radius:3px; margin-top:3px; display:inline-block; width:fit-content; }
+
+  .lane-body { flex:1; display:flex; align-items:center; padding:14px 20px; gap:0; min-height:var(--lane-h); }
+
+  .step { display:flex; flex-direction:column; align-items:center; position:relative; flex-shrink:0; }
+  .step-box { width:128px; background:var(--white); border:1.5px solid var(--border); border-radius:8px; padding:9px 9px 8px; text-align:center; position:relative; z-index:2; transition:box-shadow 0.2s; }
+  .step-box:hover { box-shadow:0 4px 16px rgba(0,0,0,0.1); }
+  .step-num { position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:20px; height:20px; border-radius:50%; background:var(--text); color:#fff; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; z-index:3; }
+  .step-label { font-size:11px; font-weight:600; line-height:1.35; color:var(--text); margin-top:4px; }
+  .step-detail { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:3px; line-height:1.3; }
+
+  .connector { display:flex; align-items:center; width:38px; flex-shrink:0; }
+  .conn { height:2px; width:38px; }
+  .lane-spacer { width:128px; flex-shrink:0; }
+  .lane-info { padding:0 20px; font-size:10.5px; color:var(--muted); font-family:'DM Mono',monospace; line-height:1.85; }
+
+  /* Step colors */
+  .s-teal .step-box { border-color:var(--teal); background:var(--teal-light); } .s-teal .step-num { background:var(--teal); }
+  .s-blue .step-box { border-color:var(--blue); background:var(--blue-light); } .s-blue .step-num { background:var(--blue); }
+  .s-indigo .step-box { border-color:var(--indigo); background:var(--indigo-light); } .s-indigo .step-num { background:var(--indigo); }
+  .s-amber .step-box { border-color:var(--amber); background:var(--amber-light); } .s-amber .step-num { background:var(--amber); }
+  .s-purple .step-box { border-color:var(--purple); background:var(--purple-light); } .s-purple .step-num { background:var(--purple); }
+  .s-pink .step-box { border-color:var(--pink); background:var(--pink-light); } .s-pink .step-num { background:var(--pink); }
+  .s-green .step-box { border-color:var(--green); background:var(--green-light); } .s-green .step-num { background:var(--green); }
+  .s-orange .step-box { border-color:var(--orange); background:var(--orange-light); } .s-orange .step-num { background:var(--orange); }
+  .s-wip .step-box { border-color:#94a3b8; background:#f8fafc; border-style:dashed; } .s-wip .step-num { background:#94a3b8; }
+
+  /* ── Screening annotation footer ── */
+  .screening-footer {
+    border-top: 1.5px dashed #c7d2fe;
+    background: #f8f9ff;
+    padding: 14px 20px 14px 170px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .screening-footer-label {
+    font-size: 9.5px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 700;
+    color: var(--indigo);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding-top: 4px;
+    margin-right: 4px;
+  }
+  .screen-pill {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    line-height: 1.4;
+    border: 1px solid transparent;
+  }
+
+  /* Notes + legend */
+  .notes-row { display:flex; gap:12px; padding:14px 20px; flex-wrap:wrap; border-top:1px solid var(--border); background:#fafbfc; }
+  .note { display:flex; align-items:flex-start; gap:6px; font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; max-width:320px; line-height:1.5; }
+  .note-dot { width:6px; height:6px; border-radius:50%; margin-top:4px; flex-shrink:0; }
+  .legend-row { display:flex; gap:20px; padding:10px 20px 16px; flex-wrap:wrap; background:#fafbfc; border-radius:0 0 12px 12px; }
+  .leg { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; }
+  .leg-line { width:22px; height:2px; border-radius:2px; }
+
+  .wip-badge { display:inline-flex; align-items:center; gap:4px; font-size:9px; font-family:'DM Mono',monospace; padding:2px 6px; border-radius:3px; background:#fef9c3; color:#92400e; border:1px dashed #fbbf24; margin-top:4px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <div class="logo">B<span>pesa</span></div>
+    <div class="page-title">TRANSACTION FLOW DIAGRAMS — SWIMLANE VIEW</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <span class="flow-badge" style="background:#e6f7f4;color:var(--teal)">BASE CHAIN</span>
+    <span class="flow-badge" style="background:#eff4ff;color:var(--blue)">bKES · USDC</span>
+    <span class="flow-badge" style="background:#f0faf3;color:var(--green)">VASP REGISTERED (wip)</span>
+    <span class="flow-badge" style="background:var(--indigo-light);color:var(--indigo)">PRETIUM · SASAPAY</span>
+  </div>
+</div>
+
+<div class="flow-tabs">
+  <div class="tab active" onclick="showFlow('f1',this)">① Deposit via M-Pesa</div>
+  <div class="tab" onclick="showFlow('f2',this)">② Deposit via Agent</div>
+  <div class="tab" onclick="showFlow('f3',this)">③ User → User Transfer</div>
+  <div class="tab" onclick="showFlow('f4',this)">④ Bpesa Merchant Payment</div>
+  <div class="tab" onclick="showFlow('f5',this)">⑤ bKES ↔ USDC Swap</div>
+  <div class="tab" onclick="showFlow('f6',this)">⑥ Withdrawal / Off-ramp</div>
+  <div class="tab" onclick="showFlow('f7',this)">⑦ Save &amp; Earn — Yield</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- FLOW 1: Deposit via M-Pesa                             -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="f1" class="flow-panel active">
+  <div class="flow-header">
+    <div class="flow-icon" style="background:#e6f7f4;">💵</div>
+    <div>
+      <div class="flow-title">Flow 1 — Deposit via M-Pesa</div>
+      <div class="flow-subtitle">User initiates via app → Bpesa Backend calls Pretium API → Pretium/SasaPay triggers STK Push → KES collected → Bpesa Base Chain mints bKES 1:1</div>
+    </div>
+    <span class="flow-badge" style="background:var(--primary-blue);color:var(--white);margin-left:auto;">FIAT → bKES</span>
+  </div>
+  <div class="swimlane-wrap">
+    <div class="swimlane-diagram">
+
+      <!-- USER -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">👤</div>
+          <div class="lane-label-name">User</div>
+          <div class="lane-label-sub">Bpesa App<br>10-digit Account No.</div>
+        </div>
+        <div class="lane-body">
+          <div class="step s-teal"><div class="step-num">1</div><div class="step-box"><div class="step-label">Initiates Deposit</div><div class="step-detail">Opens app, selects M-Pesa, enters amount and mpesa number</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--teal)"></div></div>
+          <div class="step s-teal"><div class="step-num">5</div><div class="step-box"><div class="step-label">STK Push Received</div><div class="step-detail">M-Pesa PIN prompt on phone, user confirms</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--teal)"></div></div>
+          <div class="step s-green"><div class="step-num">9</div><div class="step-box"><div class="step-label">Wallet Credited</div><div class="step-detail">bKES in non-custodial wallet. Push notification sent.</div></div></div>
+        </div>
+      </div>
+
+      <!-- BPESA BACKEND -->
+      <div class="lane-group-header">Bpesa Backend — Protocol Layer &nbsp;·&nbsp; External integrations &amp; orchestration</div>
+      <div class="lane">
+        <div class="lane-label bpesa-backend">
+          <div class="lane-label-icon">⚙️</div>
+          <div class="lane-label-name">Bpesa Backend</div>
+          <div class="lane-label-sub">Protocol Layer</div>
+          <span class="lane-label-tag" style="background:#e0e7ff;color:var(--indigo)">ORCHESTRATION</span>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--indigo)"></div></div>
+          <div class="step s-indigo"><div class="step-num">2</div><div class="step-box"><div class="step-label">AML + Limit Check</div><div class="step-detail">Calls SmileID — PEP/AML on user identity</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--indigo)"></div></div>
+          <div class="step s-indigo"><div class="step-num">3</div><div class="step-box"><div class="step-label">Calls Pretium API</div><div class="step-detail">Sends deposit amount + user phone to Pretium</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--indigo)"></div></div>
+          <div class="step s-indigo"><div class="step-num">7</div><div class="step-box"><div class="step-label">Receives Pretium Callback</div><div class="step-detail">KES collection confirmed. Instructs mint.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- BPESA BASE CHAIN -->
+      <div class="lane">
+        <div class="lane-label bpesa-chain">
+          <div class="lane-label-icon">⛓️</div>
+          <div class="lane-label-name">Bpesa Protocol</div>
+          <div class="lane-label-sub">Base Chain</div>
+          <span class="lane-label-tag" style="background:#dbeafe;color:var(--blue)">ON-CHAIN</span>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--blue)"></div></div>
+          <div class="step s-blue"><div class="step-num">8</div><div class="step-box"><div class="step-label">Mints bKES 1:1</div><div class="step-detail">bKES blacklist check before mint. bKES minted on-chain.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- PRETIUM -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">🏛️</div>
+          <div class="lane-label-name">Pretium</div>
+          <div class="lane-label-sub">Regulated On/Off-ramp<br>Fiat via SasaPay</div>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--amber)"></div></div>
+          <div class="step s-amber"><div class="step-num">4</div><div class="step-box"><div class="step-label">Triggers STK Push</div><div class="step-detail">Initiates M-Pesa STK Push via SasaPay to user phone</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--amber)"></div></div>
+          <div class="step s-amber"><div class="step-num">6</div><div class="step-box"><div class="step-label">KES Collected</div><div class="step-detail">KES settled into SasaPay fiat wallet held by Pretium on behalf of Bpesa</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- SCREENING FOOTER -->
+      <div class="screening-footer">
+        <div class="screening-footer-label">🔐 Screening</div>
+        <div class="screen-pill" style="background:#e6f7f4;color:var(--teal);border-color:#a7f3d0">👁️ SmileID — User PEP / AML / Sanctions · identity layer only (Step 2)</div>
+        <div class="screen-pill" style="background:#eff4ff;color:var(--blue);border-color:#bfdbfe">⛓️ Bpesa bKES Contract Blacklist — wallet address checked before mint (Step 8 · on-chain)</div>
+      </div>
+
+    </div><!-- end swimlane-diagram -->
+    <div class="notes-row">
+      <div class="note"><div class="note-dot" style="background:var(--amber)"></div>Bpesa has no direct M-Pesa account. Pretium + SasaPay is the regulated fiat layer that holds the paybill and fiat wallet.</div>
+      <div class="note"><div class="note-dot" style="background:var(--indigo)"></div>bKES only minted after confirmed Pretium callback — Backend orchestrates, Base Chain executes.</div>
+      <div class="note"><div class="note-dot" style="background:var(--green)"></div>KES in SasaPay fiat wallet is held by Pretium on behalf of Bpesa </div>
+    </div>
+    <div class="legend-row">
+      <div class="leg"><div class="leg-line" style="background:var(--teal)"></div>User action</div>
+      <div class="leg"><div class="leg-line" style="background:var(--indigo)"></div>Bpesa Backend (orchestration)</div>
+      <div class="leg"><div class="leg-line" style="background:var(--blue)"></div>Bpesa Protocol / Base Chain (on-chain)</div>
+      <div class="leg"><div class="leg-line" style="background:var(--amber)"></div>Pretium / SasaPay</div>
+      <div class="leg"><div class="leg-line" style="background:var(--green)"></div>Wallet credit event</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- FLOW 2: Deposit via Agent                              -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="f2" class="flow-panel">
+  <div class="flow-header">
+    <div class="flow-icon" style="background:#f0faf3;">🏪</div>
+    <div>
+      <div class="flow-title">Flow 2 — Deposit via Agent</div>
+      <div class="flow-subtitle">User gives cash → agent initiates send via app → Bpesa Backend validates → Base Chain executes bKES transfer → user credited</div>
+    </div>
+    <span class="flow-badge" style="background:var(--primary-blue);color:var(--white);margin-left:auto;">CASH → bKES</span>
+  </div>
+  <div class="swimlane-wrap">
+    <div class="swimlane-diagram">
+
+      <!-- USER -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">👤</div>
+          <div class="lane-label-name">User</div>
+          <div class="lane-label-sub">Bpesa App<br>10-digit Account No.</div>
+        </div>
+        <div class="lane-body">
+          <div class="step s-green"><div class="step-num">1</div><div class="step-box"><div class="step-label">Visits Agent</div><div class="step-detail">Gives cash. Shares 10-digit Bpesa account number.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--green)"></div></div>
+          <div class="step s-green"><div class="step-num">7</div><div class="step-box"><div class="step-label">Wallet Credited</div><div class="step-detail">bKES received. App push notification confirms.</div></div></div>
+        </div>
+      </div>
+
+      <!-- AGENT -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">🏪</div>
+          <div class="lane-label-name">Agent</div>
+          <div class="lane-label-sub">Bpesa App<br>6-digit Agent Code</div>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--green)"></div></div>
+          <div class="step s-green"><div class="step-num">2</div><div class="step-box"><div class="step-label">Receives Cash</div><div class="step-detail">Counts cash, enters user 10-digit account no. + amount</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--green)"></div></div>
+          <div class="step s-green"><div class="step-num">3</div><div class="step-box"><div class="step-label">Confirms Send</div><div class="step-detail">Reviews transaction details, confirms with PIN</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+           <div class="connector"><div class="conn" style="background:var(--green)"></div></div>
+          <div class="step s-green"><div class="step-num">6</div><div class="step-box"><div class="step-label">Commission Assigned</div><div class="step-detail">Agent commission credited on-chain to agent wallet</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- BPESA BACKEND -->
+      <div class="lane-group-header">Bpesa Backend — Protocol Layer &nbsp;·&nbsp; External integrations &amp; orchestration</div>
+      <div class="lane">
+        <div class="lane-label bpesa-backend">
+          <div class="lane-label-icon">⚙️</div>
+          <div class="lane-label-name">Bpesa Backend</div>
+          <div class="lane-label-sub">Protocol Layer</div>
+          <span class="lane-label-tag" style="background:#e0e7ff;color:var(--indigo)">ORCHESTRATION</span>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--indigo)"></div></div>
+          <div class="step s-indigo"><div class="step-num">4</div><div class="step-box"><div class="step-label">Validates &amp; Routes</div><div class="step-detail">SmileID AML check. Resolves 10-digit account → wallet address. Instructs Transfer.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- BPESA BASE CHAIN -->
+      <div class="lane">
+        <div class="lane-label bpesa-chain">
+          <div class="lane-label-icon">⛓️</div>
+          <div class="lane-label-name">Bpesa Protocol</div>
+          <div class="lane-label-sub">Base Chain</div>
+          <span class="lane-label-tag" style="background:#dbeafe;color:var(--blue)">ON-CHAIN</span>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--blue)"></div></div>
+          <div class="step s-blue"><div class="step-num">5</div><div class="step-box"><div class="step-label">bKES Transferred</div><div class="step-detail">bKES contract: Blacklist checked. agent wallet → user wallet.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--blue)"></div></div>
+        </div>
+      </div>
+
+      <!-- SCREENING FOOTER -->
+      <div class="screening-footer">
+        <div class="screening-footer-label">🔐 Screening</div>
+        <div class="screen-pill" style="background:#e6f7f4;color:var(--teal);border-color:#a7f3d0">👁️ SmileID — User &amp; Agent PEP / AML / Sanctions · identity layer only (Step 4)</div>
+        <div class="screen-pill" style="background:#eff4ff;color:var(--blue);border-color:#bfdbfe">⛓️ Bpesa bKES Contract Blacklist — agent &amp; user wallet addresses · on-chain enforcement (Step 5)</div>
+      </div>
+
+    </div>
+    <div class="notes-row">
+      <div class="note"><div class="note-dot" style="background:var(--green)"></div>No Pretium or M-Pesa involved. Agent is the on-ramp. Agent pre-funds bKES via bank, M-Pesa, or other agents.</div>
+      <div class="note"><div class="note-dot" style="background:var(--indigo)"></div>10-digit account number resolved to wallet address by Bpesa Backend — users never handle raw addresses.</div>
+      <div class="note"><div class="note-dot" style="background:var(--teal)"></div>Agents earn higher commissions than M-Pesa agents</div>
+    </div>
+    <div class="legend-row">
+      <div class="leg"><div class="leg-line" style="background:var(--green)"></div>Cash / user action</div>
+      <div class="leg"><div class="leg-line" style="background:var(--indigo)"></div>Bpesa Backend (orchestration)</div>
+      <div class="leg"><div class="leg-line" style="background:var(--blue)"></div>Bpesa Protocol / Base Chain (on-chain)</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- FLOW 3: User to User Transfer                          -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="f3" class="flow-panel">
+  <div class="flow-header">
+    <div class="flow-icon" style="background:#eff4ff;">↔️</div>
+    <div>
+      <div class="flow-title">Flow 3 — User to User Transfer</div>
+      <div class="flow-subtitle">Sender enters 10-digit account no. → Bpesa Backend validates → Base Chain executes bKES transfer + fee → receiver credited</div>
+    </div>
+    <span class="flow-badge" style="background:var(--primary-blue);color:var(--white);margin-left:auto;">bKES → bKES</span>
+  </div>
+  <div class="swimlane-wrap">
+    <div class="swimlane-diagram">
+
+      <!-- SENDER -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">👤</div>
+          <div class="lane-label-name">Sender</div>
+          <div class="lane-label-sub">Bpesa App<br>10-digit Account No.</div>
+        </div>
+        <div class="lane-body">
+          <div class="step s-blue"><div class="step-num">1</div><div class="step-box"><div class="step-label">Initiates Transfer</div><div class="step-detail">Enters receiver 10-digit account no. + amount</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--blue)"></div></div>
+          <div class="step s-blue"><div class="step-num">2</div><div class="step-box"><div class="step-label">Confirms via PIN</div><div class="step-detail">Reviews recipient name + amount, confirms</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--blue)"></div></div>
+          <div class="step s-blue"><div class="step-num">6</div><div class="step-box"><div class="step-label">Debit Confirmed</div><div class="step-detail">App notification — bKES sent successfully</div></div></div>
+        </div>
+      </div>
+
+      <!-- BPESA BACKEND -->
+      <div class="lane-group-header">Bpesa Backend — Protocol Layer &nbsp;·&nbsp; Validation &amp; orchestration</div>
+      <div class="lane">
+        <div class="lane-label bpesa-backend">
+          <div class="lane-label-icon">⚙️</div>
+          <div class="lane-label-name">Bpesa Backend</div>
+          <div class="lane-label-sub">Protocol Layer</div>
+          <span class="lane-label-tag" style="background:#e0e7ff;color:var(--indigo)">ORCHESTRATION</span>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--indigo)"></div></div>
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--indigo)"></div></div>
+          <div class="step s-indigo"><div class="step-num">3</div><div class="step-box"><div class="step-label">Validates &amp; Routes</div><div class="step-detail">SmileID AML/PEP check. Resolves both account nos. → wallet addresses. Instructs Base Chain.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- BPESA BASE CHAIN -->
+      <div class="lane">
+        <div class="lane-label bpesa-chain">
+          <div class="lane-label-icon">⛓️</div>
+          <div class="lane-label-name">Bpesa Protocol</div>
+          <div class="lane-label-sub">Base Chain</div>
+          <span class="lane-label-tag" style="background:#dbeafe;color:var(--blue)">ON-CHAIN</span>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--blue)"></div></div>
+          <div class="step s-blue"><div class="step-num">4</div><div class="step-box"><div class="step-label">bKES Transferred</div><div class="step-detail">bKES contract: Blacklist checked. sender wallet → receiver wallet.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--blue)"></div></div>
+          <div class="step s-blue"><div class="step-num">5</div><div class="step-box"><div class="step-label">Tx Fee Deducted</div><div class="step-detail">Near-zero fee deducted on-chain → Bpesa revenue address</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- RECEIVER -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">👤</div>
+          <div class="lane-label-name">Receiver</div>
+          <div class="lane-label-sub">Bpesa App<br>10-digit Account No.</div>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--blue)"></div></div>
+          <div class="step s-green"><div class="step-num">6</div><div class="step-box"><div class="step-label">Wallet Credited</div><div class="step-detail">bKES received. App push notification sent.</div></div></div>
+        </div>
+      </div>
+
+      <!-- SCREENING FOOTER -->
+      <div class="screening-footer">
+        <div class="screening-footer-label">🔐 Screening</div>
+        <div class="screen-pill" style="background:#e6f7f4;color:var(--teal);border-color:#a7f3d0">👁️ SmileID — Both parties PEP / AML / Sanctions · identity layer only (Step 3)</div>
+        <div class="screen-pill" style="background:#eff4ff;color:var(--blue);border-color:#bfdbfe">⛓️ Bpesa bKES Contract Blacklist — sender &amp; receiver wallet addresses · on-chain enforcement (Step 4)</div>
+      </div>
+
+    </div>
+    <div class="notes-row">
+      <div class="note"><div class="note-dot" style="background:var(--blue)"></div>Sender uses receiver's 10-digit account number. Backend resolves to wallet address — never exposed to user.</div>
+      <div class="note"><div class="note-dot" style="background:var(--teal)"></div>Near-zero fees vs M-Pesa P2P rates — primary user value proposition.</div>
+      <div class="note"><div class="note-dot" style="background:var(--indigo)"></div>SmileID screens the person (identity). bKES contract blacklist screens the wallet address (on-chain). Separate layers.</div>
+    </div>
+    <div class="legend-row">
+      <div class="leg"><div class="leg-line" style="background:var(--blue)"></div>User / bKES flow</div>
+      <div class="leg"><div class="leg-line" style="background:var(--indigo)"></div>Bpesa Backend (orchestration)</div>
+      <div class="leg"><div class="leg-line" style="background:var(--blue)"></div>Bpesa Protocol / Base Chain (on-chain)</div>
+      <div class="leg"><div class="leg-line" style="background:var(--green)"></div>Wallet credit</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- FLOW 4: Bpesa Merchant Payment                         -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="f4" class="flow-panel">
+  <div class="flow-header">
+    <div class="flow-icon" style="background:#f3effe;">🛒</div>
+    <div>
+      <div class="flow-title">Flow 4 — Bpesa Merchant Payment</div>
+      <div class="flow-subtitle">User scans QR or enters 6-digit merchant code → Bpesa Backend validates → Base Chain transfers bKES + deducts fee → merchant credited</div>
+    </div>
+    <span class="flow-badge" style="background:var(--primary-blue);color:var(--white);margin-left:auto;">USER → MERCHANT</span>
+  </div>
+  <div class="swimlane-wrap">
+    <div class="swimlane-diagram">
+
+      <!-- USER -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">👤</div>
+          <div class="lane-label-name">User / Customer</div>
+          <div class="lane-label-sub">Bpesa App<br>10-digit Account No.</div>
+        </div>
+        <div class="lane-body">
+          <div class="step s-purple"><div class="step-num">1</div><div class="step-box"><div class="step-label">Scan QR or Enter Code</div><div class="step-detail">Scans merchant QR code or enters 6-digit merchant code</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--purple)"></div></div>
+          <div class="step s-purple"><div class="step-num">2</div><div class="step-box"><div class="step-label">Confirms Amount</div><div class="step-detail">Sees merchant name + amount, confirms with PIN</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--purple)"></div></div>
+          <div class="step s-purple"><div class="step-num">6</div><div class="step-box"><div class="step-label">Payment Receipt</div><div class="step-detail">App confirmation — payment sent successfully</div></div></div>
+        </div>
+      </div>
+
+      <!-- BPESA BACKEND -->
+      <div class="lane-group-header">Bpesa Backend — Protocol Layer &nbsp;·&nbsp; Validation &amp; orchestration</div>
+      <div class="lane">
+        <div class="lane-label bpesa-backend">
+          <div class="lane-label-icon">⚙️</div>
+          <div class="lane-label-name">Bpesa Backend</div>
+          <div class="lane-label-sub">Protocol Layer</div>
+          <span class="lane-label-tag" style="background:#e0e7ff;color:var(--indigo)">ORCHESTRATION</span>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--indigo)"></div></div>
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--indigo)"></div></div>
+          <div class="step s-indigo"><div class="step-num">3</div><div class="step-box"><div class="step-label">Validates &amp; Routes</div><div class="step-detail">SmileID AML/PEP. Resolves merchant code → wallet. Instructs Transfer.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- BPESA BASE CHAIN -->
+      <div class="lane">
+        <div class="lane-label bpesa-chain">
+          <div class="lane-label-icon">⛓️</div>
+          <div class="lane-label-name">Bpesa Protocol</div>
+          <div class="lane-label-sub">Base Chain</div>
+          <span class="lane-label-tag" style="background:#dbeafe;color:var(--blue)">ON-CHAIN</span>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--blue)"></div></div>
+          <div class="step s-blue"><div class="step-num">4</div><div class="step-box"><div class="step-label">bKES Transferred</div><div class="step-detail">bKES contract: Blacklist checked. user wallet → merchant wallet.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--blue)"></div></div>
+          <div class="step s-blue"><div class="step-num">5</div><div class="step-box"><div class="step-label">Merchant Fee Deducted</div><div class="step-detail">Small % fee deducted on-chain → Bpesa revenue address</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- MERCHANT -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">🛒</div>
+          <div class="lane-label-name">Merchant</div>
+          <div class="lane-label-sub">6-digit Code + QR<br>Non-custodial wallet</div>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--purple)"></div></div>
+          <div class="step s-green"><div class="step-num">6</div><div class="step-box"><div class="step-label">bKES Credited</div><div class="step-detail">Merchant sees payment in app. Instant settlement.</div></div></div>
+        </div>
+      </div>
+
+      <!-- SCREENING FOOTER -->
+      <div class="screening-footer">
+        <div class="screening-footer-label">🔐 Screening</div>
+        <div class="screen-pill" style="background:#e6f7f4;color:var(--teal);border-color:#a7f3d0">👁️ SmileID — User &amp; Merchant PEP / AML / Sanctions · identity layer only (Step 3)</div>
+        <div class="screen-pill" style="background:#eff4ff;color:var(--blue);border-color:#bfdbfe">⛓️ Bpesa bKES Contract Blacklist — user &amp; merchant wallet addresses · on-chain enforcement (Step 4)</div>
+      </div>
+
+    </div>
+    <div class="notes-row">
+      <div class="note"><div class="note-dot" style="background:var(--purple)"></div>Every Bpesa merchant gets a unique 6-digit code + QR code linked to their wallet. No hardware required.</div>
+      <div class="note"><div class="note-dot" style="background:var(--blue)"></div>Enterprise merchants use custodial wallet with full reconciliation (WIP). Small merchants are non-custodial.</div>
+      <div class="note"><div class="note-dot" style="background:var(--amber)"></div>M-Pesa Till and Paybill payments are separate off-ramp flows via Pretium — not this Bpesa merchant flow.</div>
+    </div>
+    <div class="legend-row">
+      <div class="leg"><div class="leg-line" style="background:var(--purple)"></div>User / payment flow</div>
+      <div class="leg"><div class="leg-line" style="background:var(--indigo)"></div>Bpesa Backend (orchestration)</div>
+      <div class="leg"><div class="leg-line" style="background:var(--blue)"></div>Bpesa Protocol / Base Chain (on-chain)</div>
+      <div class="leg"><div class="leg-line" style="background:var(--green)"></div>Merchant credit</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- FLOW 5: bKES <-> USDC Swap                             -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="f5" class="flow-panel">
+  <div class="flow-header">
+    <div class="flow-icon" style="background:#fef3e2;">💱</div>
+    <div>
+      <div class="flow-title">Flow 5 — bKES ↔ USDC Swap</div>
+      <div class="flow-subtitle">User requests swap → Bpesa Backend checks blacklists + routes to LP → LP delivers USDC → Base Chain credits user → FX spread captured</div>
+    </div>
+    <span class="flow-badge" style="background:var(--primary-blue);color:var(--white);margin-left:auto;">CROSS-CURRENCY</span>
+  </div>
+  <div class="swimlane-wrap">
+    <div class="swimlane-diagram">
+
+      <!-- USER -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">👤</div>
+          <div class="lane-label-name">User</div>
+          <div class="lane-label-sub">Bpesa App<br>10-digit Account No.</div>
+        </div>
+        <div class="lane-body">
+          <div class="step s-amber"><div class="step-num">1</div><div class="step-box"><div class="step-label">Requests Swap</div><div class="step-detail">Selects bKES → USDC, enters amount</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--amber)"></div></div>
+          <div class="step s-amber"><div class="step-num">2</div><div class="step-box"><div class="step-label">Reviews FX Rate</div><div class="step-detail">Bpesa shows rate incl. spread. Confirms.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--amber)"></div></div>
+          <div class="step s-green"><div class="step-num">7</div><div class="step-box"><div class="step-label">USDC Received</div><div class="step-detail">USDC credited to user wallet on-chain</div></div></div>
+        </div>
+      </div>
+
+      <!-- BPESA BACKEND -->
+      <div class="lane-group-header">Bpesa Backend — Protocol Layer &nbsp;·&nbsp; LP routing &amp; FX orchestration</div>
+      <div class="lane">
+        <div class="lane-label bpesa-backend">
+          <div class="lane-label-icon">⚙️</div>
+          <div class="lane-label-name">Bpesa Backend</div>
+          <div class="lane-label-sub">Protocol Layer</div>
+          <span class="lane-label-tag" style="background:#e0e7ff;color:var(--indigo)">ORCHESTRATION</span>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--indigo)"></div></div>
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--indigo)"></div></div>
+          <div class="step s-indigo"><div class="step-num">3</div><div class="step-box"><div class="step-label">Validates</div><div class="step-detail">SmileID AML. Circle USDC blacklist check.</div></div></div>
+                    <div class="connector"><div class="conn" style="background:var(--indigo)"></div></div>
+          <div class="step s-indigo"><div class="step-num">4</div><div class="step-box"><div class="step-label">FX Spread Captured &amp; Routes to LP</div><div class="step-detail">Bpesa clips spread between LP rate and user rate.  Routes swap to LP API</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- BPESA BASE CHAIN -->
+      <div class="lane">
+        <div class="lane-label bpesa-chain">
+          <div class="lane-label-icon">⛓️</div>
+          <div class="lane-label-name">Bpesa Protocol</div>
+          <div class="lane-label-sub">Base Chain</div>
+          <span class="lane-label-tag" style="background:#dbeafe;color:var(--blue)">ON-CHAIN</span>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- LP -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">🏦</div>
+          <div class="lane-label-name">Liquidity Provider</div>
+          <div class="lane-label-sub">On/off-ramp partner</div>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--amber)"></div></div>
+          <div class="step s-amber"><div class="step-num">5</div><div class="step-box"><div class="step-label">Accepts bKES</div><div class="step-detail">LP receives bKES from Bpesa at LP rate</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--amber)"></div></div>
+          <div class="step s-amber"><div class="step-num">6</div><div class="step-box"><div class="step-label">Delivers USDC</div><div class="step-detail">Sends equivalent USDC back to User wallet</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- SCREENING FOOTER -->
+      <div class="screening-footer">
+        <div class="screening-footer-label">🔐 Screening</div>
+        <div class="screen-pill" style="background:#e6f7f4;color:var(--teal);border-color:#a7f3d0">👁️ SmileID — User PEP / AML / Sanctions · identity layer only (Step 3)</div>
+        <div class="screen-pill" style="background:#eff4ff;color:var(--blue);border-color:#bfdbfe">⛓️ Bpesa bKES Contract Blacklist — user wallet address · on-chain (Step 3)</div>
+        <div class="screen-pill" style="background:#fef3e2;color:var(--amber);border-color:#fde68a">🔵 Circle USDC Blacklist — mandatory check before any USDC delivery · on-chain enforcement (Step 3)</div>
+      </div>
+
+    </div>
+    <div class="notes-row">
+      <div class="note"><div class="note-dot" style="background:var(--amber)"></div>LP handles FX risk. Bpesa is asset-light — no open FX position on its balance sheet.</div>
+      <div class="note"><div class="note-dot" style="background:var(--blue)"></div>Circle USDC blacklist is on-chain enforcement — blacklisted addresses cannot receive USDC regardless of app-level checks.</div>
+      <div class="note"><div class="note-dot" style="background:var(--green)"></div>Future: bKES ↔ bUGX, bKES ↔ bTZS follow same flow as Bpesa deploys per-country stables.</div>
+    </div>
+    <div class="legend-row">
+      <div class="leg"><div class="leg-line" style="background:var(--amber)"></div>FX / swap flow</div>
+      <div class="leg"><div class="leg-line" style="background:var(--indigo)"></div>Bpesa Backend (LP routing)</div>
+      <div class="leg"><div class="leg-line" style="background:var(--blue)"></div>Bpesa Protocol / Base Chain (on-chain)</div>
+      <div class="leg"><div class="leg-line" style="background:var(--green)"></div>USDC delivery</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- FLOW 6: Withdrawal / Off-ramp                          -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="f6" class="flow-panel">
+  <div class="flow-header">
+    <div class="flow-icon" style="background:#fdf0f6;">📤</div>
+    <div>
+      <div class="flow-title">Flow 6 — Withdrawal / Off-ramp</div>
+      <div class="flow-subtitle">Path A: Agent cash out (bKES → cash) · Path B: Pretium/SasaPay digital payout (bKES burned on Base Chain → M-Pesa / Bank / Paybill / Till)</div>
+    </div>
+    <span class="flow-badge" style="background:var(--primary-blue);color:var(--white);margin-left:auto;">bKES → FIAT</span>
+  </div>
+  <div class="swimlane-wrap">
+    <div class="swimlane-diagram">
+
+      <!-- USER -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">👤</div>
+          <div class="lane-label-name">User</div>
+          <div class="lane-label-sub">Bpesa App<br>10-digit Account No.</div>
+        </div>
+        <div class="lane-body">
+          <div class="step s-pink"><div class="step-num">1</div><div class="step-box"><div class="step-label">Requests Withdrawal</div><div class="step-detail">Selects path: Agent or digital payout + destination</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--pink)"></div></div>
+          <div class="step s-pink"><div class="step-num">2</div><div class="step-box"><div class="step-label">Confirms via PIN</div><div class="step-detail">Reviews amount and destination, confirms</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--pink)"></div></div>
+          <div class="step s-green"><div class="step-num">6</div><div class="step-box"><div class="step-label">Cash / KES Received</div><div class="step-detail">Cash from agent OR digital payout confirmed</div></div></div>
+        </div>
+      </div>
+
+      <!-- BPESA BACKEND -->
+      <div class="lane-group-header">Bpesa Backend — Protocol Layer &nbsp;·&nbsp; Validation, burn instruction &amp; Pretium routing</div>
+      <div class="lane">
+        <div class="lane-label bpesa-backend">
+          <div class="lane-label-icon">⚙️</div>
+          <div class="lane-label-name">Bpesa Backend</div>
+          <div class="lane-label-sub">Protocol Layer</div>
+          <span class="lane-label-tag" style="background:#e0e7ff;color:var(--indigo)">ORCHESTRATION</span>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--indigo)"></div></div>
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--indigo)"></div></div>
+          <div class="step s-indigo"><div class="step-num">3</div><div class="step-box"><div class="step-label">Validates Request</div><div class="step-detail">SmileID AML. Daily limit check. Routes: Path A → Base Chain · Path B → Base Chain then Pretium.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- BPESA BASE CHAIN -->
+      <div class="lane">
+        <div class="lane-label bpesa-chain">
+          <div class="lane-label-icon">⛓️</div>
+          <div class="lane-label-name">Bpesa Protocol</div>
+          <div class="lane-label-sub">Base Chain</div>
+          <span class="lane-label-tag" style="background:#dbeafe;color:var(--blue)">ON-CHAIN</span>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--blue)"></div></div>
+          <div class="step s-blue"><div class="step-num">4a</div><div class="step-box"><div class="step-label">Path A: bKES Transfer</div><div class="step-detail">bKES sent: user wallet → agent wallet. Blacklist checked.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--blue)"></div></div>
+           <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="step s-blue"><div class="step-num">4b</div><div class="step-box"><div class="step-label">Path B: bKES Burned</div><div class="step-detail">bKES destroyed on-chain. Instructs Backend to release fiat.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- PATH A: AGENT -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">🏪</div>
+          <div class="lane-label-name">Path A — Agent</div>
+          <div class="lane-label-sub">Cash out<br>6-digit Agent Code</div>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--pink)"></div></div>
+          <div class="step s-pink"><div class="step-num">5a</div><div class="step-box"><div class="step-label">Agent Confirms Receipt</div><div class="step-detail">Verifies bKES in wallet, hands over cash to user</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- PATH B: PRETIUM -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">🏛️</div>
+          <div class="lane-label-name">Path B — Pretium</div>
+          <div class="lane-label-sub">Via SasaPay fiat wallet<br>Regulated disbursement</div>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div>
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--amber)"></div></div>
+          <div class="step s-amber"><div class="step-num">5b</div><div class="step-box"><div class="step-label">Pretium Disburses</div><div class="step-detail">Releases KES from SasaPay: M-Pesa · Bank · Paybill · Till</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- SCREENING FOOTER -->
+      <div class="screening-footer">
+        <div class="screening-footer-label">🔐 Screening</div>
+        <div class="screen-pill" style="background:#e6f7f4;color:var(--teal);border-color:#a7f3d0">👁️ SmileID — User PEP / AML / Sanctions + daily withdrawal limit · identity layer (Step 3)</div>
+        <div class="screen-pill" style="background:#eff4ff;color:var(--blue);border-color:#bfdbfe">⛓️ Bpesa bKES Contract Blacklist — wallet address checked before transfer or burn · on-chain (Step 4a / 4b)</div>
+      </div>
+
+    </div>
+    <div class="notes-row">
+      <div class="note"><div class="note-dot" style="background:var(--pink)"></div>Path A: pure on-chain bKES movement — no fiat reserve or Pretium involved. Agent absorbs the cash float.</div>
+      <div class="note"><div class="note-dot" style="background:var(--amber)"></div>Path B: Base Chain burns bKES first, then Backend instructs Pretium to disburse KES. Bpesa never holds fiat.</div>
+      <div class="note"><div class="note-dot" style="background:var(--blue)"></div>M-Pesa Till and Paybill payouts are digital off-ramps under Path B — not Bpesa merchant payment flows.</div>
+    </div>
+    <div class="legend-row">
+      <div class="leg"><div class="leg-line" style="background:var(--pink)"></div>User / bKES flow</div>
+      <div class="leg"><div class="leg-line" style="background:var(--indigo)"></div>Bpesa Backend (orchestration)</div>
+      <div class="leg"><div class="leg-line" style="background:var(--blue)"></div>Bpesa Protocol / Base Chain (on-chain)</div>
+      <div class="leg"><div class="leg-line" style="background:var(--amber)"></div>Pretium / SasaPay payout</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- FLOW 7: Save & Earn — Yield Generation                 -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="f7" class="flow-panel">
+  <div class="flow-header">
+    <div class="flow-icon" style="background:#fff4ee;">📈</div>
+    <div>
+      <div class="flow-title">Flow 7 — Save &amp; Earn · Yield Generation</div>
+      <div class="flow-subtitle">Idle float pooled → Bpesa Backend allocates across TradFi + DeFi strategies → yield harvested → distributed to agents &amp; merchants</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+      <span class="wip-badge" style="font-size:10px;padding:4px 10px;">⚠ DeFi strategies — WIP</span>
+      <span class="flow-badge" style="background:var(--primary-blue);color:var(--white);">YIELD LAYER</span>
+    </div>
+  </div>
+  <div class="swimlane-wrap">
+    <div class="swimlane-diagram">
+
+      <!-- AGENTS & MERCHANTS -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">🏪</div>
+          <div class="lane-label-name">Agents &amp; Merchants</div>
+          <div class="lane-label-sub">bKES float holders<br>Yield beneficiaries</div>
+        </div>
+        <div class="lane-body">
+          <div class="step s-orange"><div class="step-num">1</div><div class="step-box"><div class="step-label">Hold Idle Float</div><div class="step-detail">Idle bKES in wallets beyond daily operational needs</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--orange)"></div></div>
+          <div class="step s-orange"><div class="step-num">2</div><div class="step-box"><div class="step-label">Opt into Save &amp; Earn</div><div class="step-detail">Elect to allocate idle float to Bpesa yield strategies</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--orange)"></div></div>
+          <div class="step s-green"><div class="step-num">8</div><div class="step-box"><div class="step-label">Yield Distributed</div><div class="step-detail">Net yield credited to wallet in bKES after Bpesa cut</div></div></div>
+        </div>
+      </div>
+
+      <!-- BPESA BACKEND -->
+      <div class="lane-group-header orange">Bpesa Backend — Yield Engine &nbsp;·&nbsp; Float allocation &amp; strategy management</div>
+      <div class="lane">
+        <div class="lane-label bpesa-backend">
+          <div class="lane-label-icon">⚙️</div>
+          <div class="lane-label-name">Bpesa Backend</div>
+          <div class="lane-label-sub">Yield Engine</div>
+          <span class="lane-label-tag" style="background:#e0e7ff;color:var(--indigo)">ORCHESTRATION</span>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--orange)"></div></div>
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--orange)"></div></div>
+          <div class="step s-orange"><div class="step-num">3</div><div class="step-box"><div class="step-label">Pools Float</div><div class="step-detail">Idle bKES &amp; KES reserve aggregated for deployment</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--orange)"></div></div>
+          <div class="step s-orange"><div class="step-num">4</div><div class="step-box"><div class="step-label">Allocates to Strategies</div><div class="step-detail">Splits across TradFi and DeFi yield strategies</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--orange)"></div></div>
+          <div class="step s-orange"><div class="step-num">7</div><div class="step-box"><div class="step-label">Yield Harvested</div><div class="step-detail">Returns collected. Bpesa clips its revenue cut.</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- TRADFI -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">🏦</div>
+          <div class="lane-label-name">TradFi Strategies</div>
+          <div class="lane-label-sub">KES reserve · Live-ready</div>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--orange)"></div></div>
+          <div class="step s-orange"><div class="step-num">5a</div><div class="step-box"><div class="step-label">KES Deployed</div><div class="step-detail">Kenya T-bills · Money Market Funds · Bank deposits</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- DEFI -->
+      <div class="lane">
+        <div class="lane-label">
+          <div class="lane-label-icon">⬡</div>
+          <div class="lane-label-name">DeFi Strategies</div>
+          <div class="lane-label-sub">On-chain yield · ⚠ WIP</div>
+        </div>
+        <div class="lane-body">
+          <div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+          <div class="connector"><div class="conn" style="background:var(--orange)"></div></div>
+          <div class="step s-wip"><div class="step-num">5b</div><div class="step-box"><div class="step-label">Aave Lending</div><div class="step-detail">bKES/USDC supplied to Aave on Base Chain for lending yield</div><div class="wip-badge">⚠ WIP</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--orange)"></div></div>
+          <div class="step s-wip"><div class="step-num">5c</div><div class="step-box"><div class="step-label">Vuza Finance</div><div class="step-detail">On-chain African fixed income yield partnership</div><div class="wip-badge">⚠ WIP</div></div></div>
+          <div class="connector"><div class="conn" style="background:var(--border)"></div></div><div class="lane-spacer"></div>
+        </div>
+      </div>
+
+      <!-- SCREENING FOOTER -->
+      <div class="screening-footer">
+        <div class="screening-footer-label">ℹ️ Notes</div>
+        <div class="screen-pill" style="background:#f0faf3;color:var(--green);border-color:#bbf7d0">✓ TradFi strategies (T-bills, money market) are live-ready and CBK / regulator-friendly</div>
+        <div class="screen-pill" style="background:#fef9c3;color:#92400e;border-color:#fde68a">⚠ DeFi strategies (Aave, Vuza Finance) are under development — risk parameters TBD</div>
+        <div class="screen-pill" style="background:#eff4ff;color:var(--blue);border-color:#bfdbfe">💡 Bpesa clips a yield spread before distribution — third core revenue stream</div>
+      </div>
+
+    </div>
+    <div class="notes-row">
+      <div class="note"><div class="note-dot" style="background:var(--orange)"></div>TradFi strategies are live-ready. DeFi strategies (Aave, Vuza) are under development — risk parameters TBD.</div>
+      <div class="note"><div class="note-dot" style="background:var(--indigo)"></div>Bpesa Backend manages all strategy allocation and yield harvesting — no on-chain action needed for TradFi.</div>
+      <div class="note"><div class="note-dot" style="background:var(--green)"></div>Agent float yield via Save &amp; Earn is a primary incentive to recruit and retain agents over M-Pesa.</div>
+    </div>
+    <div class="legend-row">
+      <div class="leg"><div class="leg-line" style="background:var(--orange)"></div>Float / yield flow</div>
+      <div class="leg"><div class="leg-line" style="background:var(--indigo)"></div>Bpesa Backend (yield engine)</div>
+      <div class="leg"><div class="leg-line" style="background:var(--green)"></div>Yield distribution</div>
+      <div class="leg" style="gap:6px;"><div style="width:22px;height:0;border-top:2px dashed #94a3b8;display:inline-block;"></div> WIP strategy</div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  function showFlow(id, tab) {
+    document.querySelectorAll('.flow-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    tab.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bpesa — Money Flow Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --card: #161d2e;
+    --border: #1e2d45;
+    --accent: #00d4aa;
+    --accent2: #f59e0b;
+    --accent3: #6366f1;
+    --accent4: #ec4899;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --green: #10b981;
+    --red: #f43f5e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .header {
+    position: relative;
+    z-index: 10;
+    padding: 32px 48px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--accent);
+  }
+
+  .logo span { color: var(--text); }
+
+  .header-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+
+  /* Legend */
+  .legend {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    gap: 24px;
+    padding: 16px 48px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .legend-line {
+    width: 32px;
+    height: 2px;
+    border-radius: 2px;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* Main canvas area */
+  .canvas {
+    position: relative;
+    z-index: 5;
+    padding: 40px 48px;
+    min-height: calc(100vh - 140px);
+  }
+
+  /* SVG overlay for arrows */
+  .arrows-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 6;
+  }
+
+  /* Flow grid */
+  .flow-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px;
+    grid-template-rows: auto auto auto;
+    gap: 40px 60px;
+    position: relative;
+    z-index: 7;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Party cards */
+  .party {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .party:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: 0 0 24px rgba(0,212,170,0.12);
+  }
+
+  .party.highlight {
+    border-color: var(--accent);
+    box-shadow: 0 0 32px rgba(0,212,170,0.2);
+  }
+
+  .party-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .party-name {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+
+  .party-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .party-flows {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .flow-tag {
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    width: fit-content;
+  }
+
+  /* Center core */
+  .core {
+    grid-column: 2;
+    grid-row: 1 / 4;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .core-title {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .core-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .core-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .core-main {
+    border-color: var(--accent);
+    box-shadow: 0 0 40px rgba(0,212,170,0.08), inset 0 0 40px rgba(0,212,170,0.03);
+  }
+
+  .core-icon-large {
+    font-size: 36px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .core-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .core-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    line-height: 1.6;
+  }
+
+  .core-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .stat {
+    background: var(--card);
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .stat-val {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  /* Flow components row */
+  .components {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .comp {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+    transition: all 0.25s;
+    cursor: pointer;
+  }
+
+  .comp:hover {
+    border-color: var(--accent3);
+    transform: translateY(-2px);
+  }
+
+  .comp-icon { font-size: 22px; margin-bottom: 8px; }
+  .comp-name { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .comp-desc { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; line-height: 1.4; }
+
+  /* Flows section */
+  .flows-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .flow-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .flow-card:hover { transform: translateY(-2px); }
+
+  .flow-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    line-height: 1.4;
+  }
+
+  .flow-step:last-child { border-bottom: none; }
+
+  .step-num {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    flex-shrink: 0;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* Revenue section */
+  .revenue-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .rev-title {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+  }
+
+  .rev-items {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .rev-item {
+    flex: 1;
+    min-width: 140px;
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .rev-icon { font-size: 18px; margin-bottom: 6px; }
+  .rev-name { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .rev-desc { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; line-height: 1.4; }
+
+  /* Tooltip */
+  .tooltip {
+    position: fixed;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 12px;
+    max-width: 240px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 100;
+    font-family: 'Space Mono', monospace;
+    line-height: 1.6;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .tooltip.visible { opacity: 1; }
+  .tooltip-title { font-weight: 700; color: var(--accent); margin-bottom: 6px; font-family: 'Syne', sans-serif; }
+
+  /* Color helpers */
+  .c-green { color: var(--green); }
+  .c-yellow { color: var(--accent2); }
+  .c-purple { color: var(--accent3); }
+  .c-pink { color: var(--accent4); }
+  .c-teal { color: var(--accent); }
+
+  .bg-green { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.3); }
+  .bg-yellow { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); }
+  .bg-purple { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.3); }
+  .bg-pink { background: rgba(236,72,153,0.12); border-color: rgba(236,72,153,0.3); }
+  .bg-teal { background: rgba(0,212,170,0.12); border-color: rgba(0,212,170,0.3); }
+
+  /* Left/Right columns */
+  .left-col { display: flex; flex-direction: column; gap: 16px; }
+  .right-col { display: flex; flex-direction: column; gap: 16px; }
+
+  /* Animated pulse on core */
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(0,212,170,0.3); }
+    70% { box-shadow: 0 0 0 16px rgba(0,212,170,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,212,170,0); }
+  }
+
+  .core-main { animation: pulse-ring 3s ease-out infinite; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .party:nth-child(1) { animation-delay: 0.1s; }
+  .party:nth-child(2) { animation-delay: 0.2s; }
+  .party:nth-child(3) { animation-delay: 0.3s; }
+  .party:nth-child(4) { animation-delay: 0.4s; }
+
+  /* Animated flow dots on SVG */
+  .flow-dot {
+    animation: moveDot 2s linear infinite;
+  }
+
+  /* Divider */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  /* Compliance strip */
+  .compliance-strip {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .comp-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .comp-badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: blink 2s ease infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Main layout */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 210px 1fr 210px;
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 7;
+  }
+
+  /* SVG connector lines */
+  .connectors {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 6;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo">B<span>pesa</span></div>
+    <div class="header-sub">Money Flow — Full System Overview</div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <div class="badge">BASE CHAIN</div>
+    <div class="badge">bKES · USDC</div>
+    <div class="badge">VASP REGISTERED</div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-line" style="background:var(--green);"></div>
+    Fiat Flow
+  </div>
+  <div class="legend-item">
+    <div class="legend-line" style="background:var(--accent);"></div>
+    bKES / Stablecoin Flow
+  </div>
+  <div class="legend-item">
+    <div class="legend-line" style="background:var(--accent2);"></div>
+    Yield / Earnings
+  </div>
+  <div class="legend-item">
+    <div class="legend-line" style="background:var(--accent3);"></div>
+    Data / KYC
+  </div>
+  <div class="legend-item">
+    <div class="legend-line" style="background:var(--accent4);height:2px;border-top:2px dashed var(--accent4);"></div>
+    Cross-currency Swap
+  </div>
+</div>
+
+<div class="canvas">
+  <div class="main-layout">
+
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
+
+      <div class="party" data-tip="users" style="animation-delay:0.1s">
+        <div class="party-icon bg-teal">👤</div>
+        <div class="party-name">Users</div>
+        <div class="party-desc">KYC verified via SmileID. Hold bKES in non-custodial wallet.</div>
+        <div class="party-flows">
+          <div class="flow-tag bg-teal"><span class="c-teal">→</span> Deposit via M-Pesa / Agent</div>
+          <div class="flow-tag bg-teal"><span class="c-teal">→</span> Send / Receive bKES</div>
+          <div class="flow-tag bg-yellow"><span class="c-yellow">→</span> Save & Earn yield</div>
+        </div>
+      </div>
+
+      <div class="party" data-tip="agents" style="animation-delay:0.2s">
+        <div class="party-icon bg-green">🏪</div>
+        <div class="party-name">Agents</div>
+        <div class="party-desc">Physical network. Cash in / cash out. Higher limits & commissions.</div>
+        <div class="party-flows">
+          <div class="flow-tag bg-green"><span class="c-green">↔</span> Cash ↔ bKES exchange</div>
+          <div class="flow-tag bg-yellow"><span class="c-yellow">→</span> Earn yield on float</div>
+          <div class="flow-tag bg-green"><span class="c-green">→</span> Top up via Bank/M-Pesa</div>
+        </div>
+      </div>
+
+      <div class="party" data-tip="merchants" style="animation-delay:0.3s">
+        <div class="party-icon bg-purple">🛒</div>
+        <div class="party-name">Merchants</div>
+        <div class="party-desc">Small merchants use payment code (non-custodial). Enterprise gets custodial wallet.</div>
+        <div class="party-flows">
+          <div class="flow-tag bg-purple"><span class="c-purple">→</span> Receive via payment code</div>
+          <div class="flow-tag bg-purple"><span class="c-purple">→</span> Enterprise: custodial wallet</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CENTER CORE -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+
+      <!-- Core protocol -->
+      <div class="core-box core-main">
+        <span class="core-icon-large">⬡</span>
+        <div class="core-name">Bpesa Protocol</div>
+        <div class="core-sub">Decentralized mobile money on Base Chain<br>bKES · USDC · Local Stables</div>
+        <div class="core-stats">
+          <div class="stat">
+            <div class="stat-val">~0</div>
+            <div class="stat-label">Tx Fees</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val">1:1</div>
+            <div class="stat-label">bKES Peg</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val">Base</div>
+            <div class="stat-label">Chain</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key flows -->
+      <div class="section-label">Transaction Flows</div>
+      <div class="flows-section">
+
+        <div class="flow-card" style="border-color:rgba(16,185,129,0.3)">
+          <div class="flow-card-title"><span>💵</span> <span class="c-green">Deposit via M-Pesa</span></div>
+          <div class="flow-step"><div class="step-num">1</div>User sends KES via M-Pesa</div>
+          <div class="flow-step"><div class="step-num">2</div>Fiat stored in reserve wallet</div>
+          <div class="flow-step"><div class="step-num">3</div>bKES minted 1:1 for user</div>
+          <div class="flow-step"><div class="step-num">4</div>User wallet credited</div>
+        </div>
+
+        <div class="flow-card" style="border-color:rgba(0,212,170,0.3)">
+          <div class="flow-card-title"><span>🏪</span> <span class="c-teal">Deposit via Agent</span></div>
+          <div class="flow-step"><div class="step-num">1</div>User gives cash to agent</div>
+          <div class="flow-step"><div class="step-num">2</div>Agent sends bKES from wallet</div>
+          <div class="flow-step"><div class="step-num">3</div>User wallet credited instantly</div>
+        </div>
+
+        <div class="flow-card" style="border-color:rgba(99,102,241,0.3)">
+          <div class="flow-card-title"><span>↔</span> <span class="c-purple">User → User Transfer</span></div>
+          <div class="flow-step"><div class="step-num">1</div>Sender initiates via app/USSD</div>
+          <div class="flow-step"><div class="step-num">2</div>bKES moves on-chain</div>
+          <div class="flow-step"><div class="step-num">3</div>Receiver wallet credited</div>
+          <div class="flow-step"><div class="step-num">4</div>Near-zero fee deducted</div>
+        </div>
+
+        <div class="flow-card" style="border-color:rgba(236,72,153,0.3)">
+          <div class="flow-card-title"><span>🛒</span> <span class="c-pink">Merchant Payment</span></div>
+          <div class="flow-step"><div class="step-num">1</div>User scans merchant code</div>
+          <div class="flow-step"><div class="step-num">2</div>bKES sent on-chain</div>
+          <div class="flow-step"><div class="step-num">3</div>Merchant wallet credited</div>
+        </div>
+
+        <div class="flow-card" style="border-color:rgba(245,158,11,0.3)">
+          <div class="flow-card-title"><span>💱</span> <span class="c-yellow">bKES ↔ USDC Swap</span></div>
+          <div class="flow-step"><div class="step-num">1</div>User initiates swap</div>
+          <div class="flow-step"><div class="step-num">2</div>LP provides liquidity</div>
+          <div class="flow-step"><div class="step-num">3</div>FX spread captured by Bpesa</div>
+          <div class="flow-step"><div class="step-num">4</div>USDC delivered to user</div>
+        </div>
+
+        <div class="flow-card" style="border-color:rgba(16,185,129,0.3)">
+          <div class="flow-card-title"><span>📤</span> <span class="c-green">Withdrawal (Off-ramp)</span></div>
+          <div class="flow-step"><div class="step-num">1</div>User requests withdrawal</div>
+          <div class="flow-step"><div class="step-num">2</div>Via Agent: bKES → cash</div>
+          <div class="flow-step"><div class="step-num">3</div>Via M-Pesa: bKES burned → fiat released</div>
+        </div>
+
+      </div>
+
+      <!-- Revenue model -->
+      <div class="section-label" style="margin-top:8px;">Revenue Streams</div>
+      <div class="revenue-bar">
+        <div class="rev-items">
+          <div class="rev-item">
+            <div class="rev-icon">💸</div>
+            <div class="rev-name">Tx Fees</div>
+            <div class="rev-desc">Small cut on every send, receive & merchant payment</div>
+          </div>
+          <div class="rev-item">
+            <div class="rev-icon">💱</div>
+            <div class="rev-name">FX Spread</div>
+            <div class="rev-desc">Spread on bKES↔USDC & cross-currency swaps</div>
+          </div>
+          <div class="rev-item">
+            <div class="rev-icon">📈</div>
+            <div class="rev-name">Yield Cut</div>
+            <div class="rev-desc">Cut of TradFi + DeFi yield from reserve deployment</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+
+      <div class="party" data-tip="mpesa" style="animation-delay:0.1s">
+        <div class="party-icon bg-green">📱</div>
+        <div class="party-name">M-Pesa</div>
+        <div class="party-desc">On/off-ramp gateway. Fiat entry and exit point for most users.</div>
+        <div class="party-flows">
+          <div class="flow-tag bg-green"><span class="c-green">→</span> Fiat deposit trigger</div>
+          <div class="flow-tag bg-green"><span class="c-green">←</span> Fiat withdrawal payout</div>
+        </div>
+      </div>
+
+      <div class="party" data-tip="lp" style="animation-delay:0.2s">
+        <div class="party-icon bg-yellow">🏦</div>
+        <div class="party-name">Liquidity Providers</div>
+        <div class="party-desc">On/off-ramp partners for cross-stable swaps. Provide USDC & other stables.</div>
+        <div class="party-flows">
+          <div class="flow-tag bg-yellow"><span class="c-yellow">↔</span> bKES ↔ USDC liquidity</div>
+          <div class="flow-tag bg-yellow"><span class="c-yellow">↔</span> Cross-currency support</div>
+        </div>
+      </div>
+
+      <div class="party" data-tip="reserve" style="animation-delay:0.3s">
+        <div class="party-icon bg-pink">🏛️</div>
+        <div class="party-name">Fiat Reserve</div>
+        <div class="party-desc">M-Pesa deposits held here. Invested in TradFi/DeFi to generate yield.</div>
+        <div class="party-flows">
+          <div class="flow-tag bg-pink"><span class="c-pink">→</span> T-bills / Money Market</div>
+          <div class="flow-tag bg-yellow"><span class="c-yellow">→</span> Yield → Save & Earn</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <hr class="section-divider" style="max-width:1200px;margin:32px auto;">
+
+  <!-- Bottom row: Infrastructure + Compliance -->
+  <div style="max-width:1200px;margin:0 auto;">
+    <div class="section-label">Infrastructure & Compliance</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+      <div>
+        <div class="section-label" style="margin-bottom:12px;">Tech Stack</div>
+        <div class="components">
+          <div class="comp">
+            <div class="comp-icon">⛓️</div>
+            <div class="comp-name">Base Chain</div>
+            <div class="comp-desc">L2 blockchain. Low fees. bKES + USDC</div>
+          </div>
+          <div class="comp">
+            <div class="comp-icon">📡</div>
+            <div class="comp-name">Africa's Talking</div>
+            <div class="comp-desc">USSD gateway. Feature phone access</div>
+          </div>
+          <div class="comp">
+            <div class="comp-icon">🔐</div>
+            <div class="comp-name">Blockradar</div>
+            <div class="comp-desc">Custodial wallet infra for enterprise</div>
+          </div>
+          <div class="comp">
+            <div class="comp-icon">👁️</div>
+            <div class="comp-name">SmileID</div>
+            <div class="comp-desc">KYC, liveness, AML & monitoring</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label" style="margin-bottom:12px;">Compliance & Access</div>
+        <div class="compliance-strip">
+          <div class="comp-badge"><div class="comp-badge-dot"></div>VASP Registered · CBK</div>
+          <div class="comp-badge"><div class="comp-badge-dot"></div>SmileID KYC + AML</div>
+          <div class="comp-badge"><div class="comp-badge-dot"></div>M-Pesa Tx Limits</div>
+          <div class="comp-badge"><div class="comp-badge-dot"></div>Higher Agent Limits</div>
+          <div class="comp-badge"><div class="comp-badge-dot"></div>App + USSD Access</div>
+          <div class="comp-badge"><div class="comp-badge-dot"></div>Enterprise KYB</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-title" id="tt-title"></div>
+  <div id="tt-body"></div>
+</div>
+
+<script>
+  const tips = {
+    users: {
+      title: "Users",
+      body: "Download app → SmileID KYC → non-custodial wallet → transact via app or USSD. Daily limits mirror M-Pesa."
+    },
+    agents: {
+      title: "Agents",
+      body: "Physical cash in/cash out network. Pre-funded with bKES. Earn higher commissions than M-Pesa agents + yield on float via Save & Earn."
+    },
+    merchants: {
+      title: "Merchants",
+      body: "Small merchants: payment code on non-custodial wallet. Enterprise: custodial wallet with full treasury management via Blockradar."
+    },
+    mpesa: {
+      title: "M-Pesa",
+      body: "Primary fiat on/off ramp. User deposits KES → fiat stored in reserve → bKES minted 1:1. Withdrawals reverse the flow."
+    },
+    lp: {
+      title: "Liquidity Providers",
+      body: "Partner on/off ramp providers. Supply USDC and other stables for cross-currency swaps. Bpesa clips FX spread on every swap."
+    },
+    reserve: {
+      title: "Fiat Reserve",
+      body: "Holds all M-Pesa deposits. Invested in Kenyan T-bills, money market funds, and DeFi to generate yield. Yield funds Save & Earn for agents and users."
+    }
+  };
+
+  const tooltip = document.getElementById('tooltip');
+  const ttTitle = document.getElementById('tt-title');
+  const ttBody = document.getElementById('tt-body');
+
+  document.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mouseenter', (e) => {
+      const key = el.dataset.tip;
+      if (!tips[key]) return;
+      ttTitle.textContent = tips[key].title;
+      ttBody.textContent = tips[key].body;
+      tooltip.classList.add('visible');
+    });
+    el.addEventListener('mousemove', (e) => {
+      tooltip.style.left = (e.clientX + 16) + 'px';
+      tooltip.style.top = (e.clientY - 10) + 'px';
+    });
+    el.addEventListener('mouseleave', () => {
+      tooltip.classList.remove('visible');
+    });
+  });
+</script>
+</body>
+</html>
