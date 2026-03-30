@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bpesa — System Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060a14;
+  --surface: #0d1423;
+  --surface2: #111827;
+  --border: #1e2d47;
+  --border2: #243552;
+  --teal: #00d4a8;
+  --teal-dim: #00d4a820;
+  --teal-mid: #00d4a840;
+  --blue: #3b82f6;
+  --blue-dim: #3b82f615;
+  --indigo: #6366f1;
+  --amber: #f59e0b;
+  --amber-dim: #f59e0b15;
+  --green: #10b981;
+  --green-dim: #10b98115;
+  --pink: #ec4899;
+  --pink-dim: #ec489915;
+  --orange: #f97316;
+  --orange-dim: #f9731615;
+  --purple: #a855f7;
+  --purple-dim: #a855f715;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --muted2: #94a3b8;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'Syne', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,168,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,168,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 40px 32px; }
+
+/* ── Header ── */
+.header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 56px; gap: 24px; flex-wrap: wrap;
+}
+.logo-area { display: flex; flex-direction: column; gap: 6px; }
+.logo {
+  font-size: 36px; font-weight: 800; letter-spacing: -1px;
+  background: linear-gradient(135deg, var(--teal), var(--blue));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.logo-sub { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; }
+
+.header-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.badge {
+  font-family: 'Space Mono', monospace; font-size: 9px; padding: 4px 10px;
+  border-radius: 4px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  border: 1px solid;
+}
+
+/* ── Nav tabs ── */
+.nav {
+  display: flex; gap: 4px; margin-bottom: 40px; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 6px;
+}
+.nav-btn {
+  padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none; background: transparent; color: var(--muted2);
+  font-family: 'Syne', sans-serif; transition: all 0.2s; white-space: nowrap;
+}
+.nav-btn:hover { color: var(--text); background: var(--border); }
+.nav-btn.active { background: var(--teal); color: #000; }
+
+/* ── Panels ── */
+.panel { display: none; animation: fadeIn 0.3s ease; }
+.panel.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── Section title ── */
+.section-title {
+  font-size: 11px; font-family: 'Space Mono', monospace; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 6px;
+}
+.section-heading { font-size: 28px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+.section-desc { font-size: 14px; color: var(--muted2); line-height: 1.7; max-width: 640px; margin-bottom: 36px; }
+
+/* ── Cards ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px; transition: all 0.2s; cursor: pointer;
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent, var(--teal)), transparent);
+  opacity: 0; transition: opacity 0.2s;
+}
+.card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.card:hover::before { opacity: 1; }
+.card.expanded { border-color: var(--accent, var(--teal)); }
+.card.expanded::before { opacity: 1; }
+
+.card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 0; }
+.card-icon {
+  width: 44px; height: 44px; border-radius: 10px; display: flex;
+  align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+}
+.card-title { font-size: 15px; font-weight: 700; }
+.card-sub { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 2px; }
+.card-chevron { margin-left: auto; color: var(--muted); font-size: 18px; transition: transform 0.2s; }
+.card.expanded .card-chevron { transform: rotate(180deg); color: var(--teal); }
+
+.card-body { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+.card.expanded .card-body { display: block; }
+
+/* ── Grid layouts ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media(max-width: 900px) { .grid-2,.grid-3,.grid-4 { grid-template-columns: 1fr 1fr; } }
+@media(max-width: 600px) { .grid-2,.grid-3,.grid-4 { grid-template-columns: 1fr; } }
+
+/* ── Stat boxes ── */
+.stat-box {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px;
+}
+.stat-label { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+.stat-value { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.stat-detail { font-size: 11px; color: var(--muted2); margin-top: 4px; font-family: 'Space Mono', monospace; }
+
+/* ── List items ── */
+.list-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  font-size: 13px; line-height: 1.5;
+}
+.list-item:last-child { border-bottom: none; }
+.list-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+.list-label { font-weight: 600; color: var(--text); }
+.list-desc { color: var(--muted2); font-family: 'Space Mono', monospace; font-size: 11px; margin-top: 2px; }
+
+/* ── Flow diagram ── */
+.flow-row {
+  display: flex; align-items: center; gap: 0;
+  margin-bottom: 8px; flex-wrap: nowrap; overflow-x: auto;
+}
+.flow-node {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; font-size: 12px; font-weight: 600;
+  white-space: nowrap; flex-shrink: 0; text-align: center;
+  transition: all 0.2s;
+}
+.flow-node:hover { border-color: var(--teal); color: var(--teal); }
+.flow-arrow {
+  color: var(--muted); font-size: 18px; flex-shrink: 0; padding: 0 4px;
+}
+.flow-arrow.colored { color: var(--teal); }
+
+/* ── Vault visualization ── */
+.vault-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+@media(max-width: 800px) { .vault-grid { grid-template-columns: repeat(3, 1fr); } }
+@media(max-width: 500px) { .vault-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.vault-card {
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 16px; text-align: center;
+  transition: all 0.3s; position: relative; overflow: hidden;
+}
+.vault-card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: var(--fill, 0%); background: var(--vault-color, var(--teal));
+  opacity: 0.08; transition: height 1s ease;
+}
+.vault-card:hover { border-color: var(--vault-color, var(--teal)); transform: translateY(-3px); }
+.vault-icon { font-size: 24px; margin-bottom: 8px; }
+.vault-name { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+.vault-pct { font-size: 26px; font-weight: 800; }
+.vault-desc { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 4px; line-height: 1.4; }
+
+/* ── Loop cards ── */
+.loop-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px; position: relative;
+}
+.loop-label {
+  font-size: 9px; font-family: 'Space Mono', monospace; letter-spacing: 2px;
+  text-transform: uppercase; margin-bottom: 4px;
+}
+.loop-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+.loop-cadence {
+  position: absolute; top: 16px; right: 16px;
+  font-size: 10px; font-family: 'Space Mono', monospace;
+  padding: 3px 8px; border-radius: 20px; font-weight: 700;
+}
+
+/* ── Health indicator ── */
+.health-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.health-row:last-child { border-bottom: none; }
+.health-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+.health-name { font-size: 13px; font-weight: 600; flex: 1; }
+.health-status { font-size: 10px; font-family: 'Space Mono', monospace; padding: 2px 8px; border-radius: 10px; }
+
+/* ── Timeline ── */
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 1px; background: var(--border2); }
+.timeline-item { position: relative; margin-bottom: 20px; }
+.timeline-item::before {
+  content: ''; position: absolute; left: -24px; top: 6px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--item-color, var(--teal)); border: 2px solid var(--bg);
+}
+.timeline-step { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); margin-bottom: 3px; letter-spacing: 1px; }
+.timeline-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.timeline-desc { font-size: 12px; color: var(--muted2); line-height: 1.5; }
+
+/* ── Penalty table ── */
+.penalty-row {
+  display: flex; align-items: center; gap: 12px; padding: 12px 0;
+  border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.penalty-row:last-child { border-bottom: none; }
+.penalty-icon { font-size: 18px; flex-shrink: 0; width: 28px; text-align: center; }
+.penalty-name { font-weight: 600; flex: 1; }
+.penalty-action { font-size: 11px; font-family: 'Space Mono', monospace; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+
+/* ── Fee calc ── */
+.fee-slider-wrap { margin-bottom: 24px; }
+.fee-slider-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+.fee-slider-label span { font-family: 'Space Mono', monospace; color: var(--teal); font-weight: 700; }
+input[type=range] {
+  width: 100%; -webkit-appearance: none; height: 4px;
+  background: var(--border2); border-radius: 2px; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--teal); cursor: pointer; border: 3px solid var(--bg);
+  box-shadow: 0 0 0 2px var(--teal);
+}
+
+.fee-result-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
+@media(max-width: 700px) { .fee-result-grid { grid-template-columns: repeat(3, 1fr); } }
+.fee-result-box {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px; text-align: center;
+}
+.fee-result-pct { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); margin-bottom: 6px; }
+.fee-result-val { font-size: 16px; font-weight: 800; }
+.fee-result-name { font-size: 10px; color: var(--muted2); margin-top: 4px; }
+
+/* ── Misc ── */
+.divider { height: 1px; background: var(--border); margin: 24px 0; }
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-family: 'Space Mono', monospace;
+  padding: 3px 8px; border-radius: 4px; font-weight: 700;
+}
+.mb-4 { margin-bottom: 4px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.mt-16 { margin-top: 16px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.col { display: flex; flex-direction: column; gap: 8px; }
+.mono { font-family: 'Space Mono', monospace; }
+.small { font-size: 12px; }
+.muted { color: var(--muted2); }
+
+.glow {
+  box-shadow: 0 0 30px var(--glow-color, rgba(0,212,168,0.15));
+}
+
+/* Animated number */
+.count-up { display: inline-block; }
+
+/* Self-healing status board */
+.status-board {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px;
+}
+.status-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+}
+.status-live {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+  animation: pulse 1.5s infinite;
+}
+.status-title { font-size: 13px; font-weight: 700; }
+.status-time { font-size: 11px; font-family: 'Space Mono', monospace; color: var(--muted); margin-left: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-area">
+      <div class="logo">Bpesa</div>
+      <div class="logo-sub">Protocol Architecture — Self-Reliant System</div>
+      <div class="header-badges" style="margin-top:8px;">
+        <span class="badge" style="color:var(--teal);border-color:var(--teal);background:var(--teal-dim)">Base Chain L2</span>
+        <span class="badge" style="color:var(--blue);border-color:var(--blue);background:var(--blue-dim)">Meta-Transactions</span>
+        <span class="badge" style="color:var(--green);border-color:var(--green);background:var(--green-dim)">Fully Automated</span>
+        <span class="badge" style="color:var(--amber);border-color:var(--amber);background:var(--amber-dim)">Community Relayers</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav">
+    <button class="nav-btn active" onclick="showPanel('overview',this)">Overview</button>
+    <button class="nav-btn" onclick="showPanel('relayers',this)">Relayer Network</button>
+    <button class="nav-btn" onclick="showPanel('treasury',this)">Treasury & Vaults</button>
+    <button class="nav-btn" onclick="showPanel('keeper',this)">Keeper System</button>
+    <button class="nav-btn" onclick="showPanel('fees',this)">Fee Calculator</button>
+    <button class="nav-btn" onclick="showPanel('healing',this)">Self-Healing</button>
+  </div>
+
+
+  <!-- ══ PANEL: OVERVIEW ══ -->
+  <div id="panel-overview" class="panel active">
+    <div class="section-title">System Overview</div>
+    <div class="section-heading">How Bpesa Works</div>
+    <div class="section-desc">A fully automated, community-powered protocol. Users never hold gas. Relayers forward transactions. The treasury funds itself. No human needed for day-to-day operations.</div>
+
+    <!-- Core flow -->
+    <div class="mb-16">
+      <div class="mono small muted mb-8">CORE TRANSACTION FLOW</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;overflow-x:auto;">
+        <div class="flow-row">
+          <div class="flow-node" style="border-color:var(--teal);color:var(--teal);">👤 User Signs<br><span style="font-size:10px;color:var(--muted)">EIP-712 payload</span></div>
+          <div class="flow-arrow colored">→</div>
+          <div class="flow-node" style="border-color:var(--blue);color:var(--blue);">📡 Relayer Picks Up<br><span style="font-size:10px;color:var(--muted)">Verifies sig locally</span></div>
+          <div class="flow-arrow colored">→</div>
+          <div class="flow-node" style="border-color:var(--indigo);color:var(--indigo);">⛓️ Forwards On-chain<br><span style="font-size:10px;color:var(--muted)">Pays gas in ETH</span></div>
+          <div class="flow-arrow colored">→</div>
+          <div class="flow-node" style="border-color:var(--purple);color:var(--purple);">📜 Contract Executes<br><span style="font-size:10px;color:var(--muted)">Whitelist check + transfer</span></div>
+          <div class="flow-arrow colored">→</div>
+          <div class="flow-node" style="border-color:var(--amber);color:var(--amber);">💰 Fee Split<br><span style="font-size:10px;color:var(--muted)">5 vaults funded</span></div>
+          <div class="flow-arrow colored">→</div>
+          <div class="flow-node" style="border-color:var(--green);color:var(--green);">✅ Tx Confirmed<br><span style="font-size:10px;color:var(--muted)">User notified</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Four pillars -->
+    <div class="mono small muted mb-8">FOUR PILLARS</div>
+    <div class="grid-2" style="margin-bottom:24px;">
+
+      <div class="card" style="--accent:var(--teal)" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon" style="background:var(--teal-dim)">📡</div>
+          <div><div class="card-title">Community Relayer Network</div><div class="card-sub">Decentralised · Docker-based · Permissioned</div></div>
+          <div class="card-chevron">⌄</div>
+        </div>
+        <div class="card-body">
+          <div class="list-item"><div class="list-dot" style="background:var(--teal)"></div><div><div class="list-label">Anyone can run a relayer node</div><div class="list-desc">Public Docker image · operator manages own ETH key via env</div></div></div>
+          <div class="list-item"><div class="list-dot" style="background:var(--teal)"></div><div><div class="list-label">Auto-approved via Gateway Contract</div><div class="list-desc">Stake bKES · ETH balance · uptime · image hash check</div></div></div>
+          <div class="list-item"><div class="list-dot" style="background:var(--teal)"></div><div><div class="list-label">Each gets a subdomain on approval</div><div class="list-desc">relayerN.node.bpesa.net · TLS auto-provisioned</div></div></div>
+          <div class="list-item"><div class="list-dot" style="background:var(--teal)"></div><div><div class="list-label">Master relayer always fallback</div><div class="list-desc">master.node.bpesa.net · Bpesa-operated · never suspended</div></div></div>
+        </div>
+      </div>
+
+      <div class="card" style="--accent:var(--amber)" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon" style="background:var(--amber-dim)">🏛️</div>
+          <div><div class="card-title">Smart Contract Vaults</div><div class="card-sub">5 purpose-specific on-chain vaults</div></div>
+          <div class="card-chevron">⌄</div>
+        </div>
+        <div class="card-body">
+          <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div><div class="list-label">Fee splits atomically on every tx</div><div class="list-desc">No manual allocation · instant on receipt</div></div></div>
+          <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div><div class="list-label">Operations · Liquidity · Rewards · ETH · Team</div><div class="list-desc">60% · 20% · 10% · 5% · 5%</div></div></div>
+          <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div><div class="list-label">Team vault uses Option C split</div><div class="list-desc">Pre-profitability → 100% treasury · Post → 60/40 split</div></div></div>
+          <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div><div class="list-label">Multisig on profit distribution</div><div class="list-desc">3 of 5 signatures required for withdrawal</div></div></div>
+        </div>
+      </div>
+
+      <div class="card" style="--accent:var(--indigo)" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon" style="background:var(--purple-dim)">⚙️</div>
+          <div><div class="card-title">Keeper Service</div><div class="card-sub">The autonomous brain · primary + secondary + watchdog</div></div>
+          <div class="card-chevron">⌄</div>
+        </div>
+        <div class="card-body">
+          <div class="list-item"><div class="list-dot" style="background:var(--indigo)"></div><div><div class="list-label">Primary + Secondary keeper instances</div><div class="list-desc">Redis distributed lock · auto-failover in seconds</div></div></div>
+          <div class="list-item"><div class="list-dot" style="background:var(--indigo)"></div><div><div class="list-label">Runs 3 continuous loops</div><div class="list-desc">Health monitor · reinstatement · vault top-up</div></div></div>
+          <div class="list-item"><div class="list-dot" style="background:var(--indigo)"></div><div><div class="list-label">On-chain heartbeat every hour</div><div class="list-desc">Publicly verifiable · watchdog reads from chain</div></div></div>
+          <div class="list-item"><div class="list-dot" style="background:var(--indigo)"></div><div><div class="list-label">Self-funded from Operations Vault</div><div class="list-desc">Vault 5 auto-tops up keeper ETH · ~$0.54/month cost</div></div></div>
+        </div>
+      </div>
+
+      <div class="card" style="--accent:var(--green)" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon" style="background:var(--green-dim)">💸</div>
+          <div><div class="card-title">Automated Payout Engine</div><div class="card-sub">Weekly · fully on-chain · zero human involvement</div></div>
+          <div class="card-chevron">⌄</div>
+        </div>
+        <div class="card-body">
+          <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><div class="list-label">ETH reimbursement — always ETH</div><div class="list-desc">Calculated from chain receipts · not relayer reports</div></div></div>
+          <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><div class="list-label">Rewards proportional to stables relayed</div><div class="list-desc">USD-equivalent weighting · FX rate locked at tx time</div></div></div>
+          <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><div class="list-label">Operator chooses payout stable</div><div class="list-desc">bKES · USDC · proportional by volume processed</div></div></div>
+          <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><div class="list-label">Circuit breakers on every payout</div><div class="list-desc">3x last week cap · 5% FX deviation hold</div></div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Human touchpoints -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;">
+      <div class="mono small muted mb-16">THE ONLY 4 HUMAN INTERVENTION POINTS</div>
+      <div class="grid-4">
+        <div class="stat-box" style="border-color:#ef444430">
+          <div class="stat-label">Alert 1</div>
+          <div style="font-size:13px;font-weight:700;color:#ef4444;margin-bottom:4px;">Master Relayer Down</div>
+          <div class="stat-detail">PagerDuty → Engineering</div>
+        </div>
+        <div class="stat-box" style="border-color:#f59e0b30">
+          <div class="stat-label">Alert 2</div>
+          <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:4px;">Vault 1 Below Floor</div>
+          <div class="stat-detail">Fee revenue not keeping up</div>
+        </div>
+        <div class="stat-box" style="border-color:#f59e0b30">
+          <div class="stat-label">Alert 3</div>
+          <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:4px;">Keeper Fully Down</div>
+          <div class="stat-detail">Primary + secondary failed</div>
+        </div>
+        <div class="stat-box" style="border-color:#f59e0b30">
+          <div class="stat-label">Alert 4</div>
+          <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:4px;">FX Circuit Breaker</div>
+          <div class="stat-detail">KES/USD >5% deviation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ PANEL: RELAYERS ══ -->
+  <div id="panel-relayers" class="panel">
+    <div class="section-title">Relayer Network</div>
+    <div class="section-heading">Community Node Architecture</div>
+    <div class="section-desc">Anyone can run a relayer. The Gateway Contract auto-approves based on verifiable criteria. No Bpesa team member needs to manually whitelist anything.</div>
+
+    <!-- Lifecycle -->
+    <div class="grid-2" style="margin-bottom:24px;">
+      <div>
+        <div class="mono small muted mb-16">RELAYER LIFECYCLE</div>
+        <div class="timeline">
+          <div class="timeline-item" style="--item-color:var(--muted2)">
+            <div class="timeline-step">STEP 1</div>
+            <div class="timeline-title">Operator Registers</div>
+            <div class="timeline-desc">Calls registerRelayer() on Gateway Contract. Stakes minimum bKES. Provides server endpoint + payout stable preference.</div>
+          </div>
+          <div class="timeline-item" style="--item-color:var(--amber)">
+            <div class="timeline-step">STEP 2</div>
+            <div class="timeline-title">Automated Checks Run</div>
+            <div class="timeline-desc">Backend service verifies: bKES stake · ETH balance · image hash · health endpoint reachable · 72hr minimum age · one wallet per relayer.</div>
+          </div>
+          <div class="timeline-item" style="--item-color:var(--teal)">
+            <div class="timeline-step">STEP 3</div>
+            <div class="timeline-title">Approved + Subdomain Assigned</div>
+            <div class="timeline-desc">Gateway Contract emits RelayerApproved. DNS automation creates relayerN.node.bpesa.net. TLS cert auto-provisioned.</div>
+          </div>
+          <div class="timeline-item" style="--item-color:var(--green)">
+            <div class="timeline-step">STEP 4</div>
+            <div class="timeline-title">Live — Earning Rewards</div>
+            <div class="timeline-desc">Added to approved list. Mobile polls and starts routing txs. Weekly score tracked. ETH reimbursement + stable rewards accumulate.</div>
+          </div>
+          <div class="timeline-item" style="--item-color:var(--pink)">
+            <div class="timeline-step">STEP 5 (if needed)</div>
+            <div class="timeline-title">Auto-Suspend + Reinstate</div>
+            <div class="timeline-desc">Health drop or ETH low → auto-suspended. Operator fixes issue → reinstatement loop re-runs checks → back online automatically.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="mono small muted mb-16">SYBIL RESISTANCE STACK</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+          <div class="loop-card" style="--accent:var(--teal)">
+            <div class="loop-label" style="color:var(--teal)">Layer 1 — Economic Cost</div>
+            <div class="loop-title">bKES Stake Required</div>
+            <div class="small muted">Real capital locked to get approved. Makes spinning up N fake nodes expensive. Slashable on repeated violations.</div>
+          </div>
+          <div class="loop-card">
+            <div class="loop-label" style="color:var(--blue)">Layer 2 — Time Cost</div>
+            <div class="loop-title">72hr Minimum Age</div>
+            <div class="small muted">Throwaway nodes can't earn. Must be registered and alive for 3 days before rewards kick in.</div>
+          </div>
+          <div class="loop-card">
+            <div class="loop-label" style="color:var(--amber)">Layer 3 — ETH Floor</div>
+            <div class="loop-title">Minimum ETH Balance</div>
+            <div class="small muted">Must maintain ETH balance to stay approved. Fake nodes that don't stay funded get auto-suspended.</div>
+          </div>
+          <div class="loop-card">
+            <div class="loop-label" style="color:var(--purple)">Layer 4 — Image Integrity</div>
+            <div class="loop-title">Approved Image Hash On-chain</div>
+            <div class="small muted">Modified Docker images detected and rejected. Gateway stores approved hash. Relayer self-reports on startup.</div>
+          </div>
+        </div>
+
+        <div class="mono small muted mb-16">MOBILE RELAYER SELECTION</div>
+        <div class="loop-card">
+          <div class="flow-row" style="flex-wrap:wrap;gap:8px;">
+            <div class="flow-node" style="font-size:11px;">App Init</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--teal);color:var(--teal)">Poll Gateway<br>GET /relayers/approved</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;">Sort by Score</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--green);color:var(--green)">Primary Relayer</div>
+          </div>
+          <div class="divider"></div>
+          <div class="small muted">Failover chain: Primary → Secondary → Master (hardcoded). Refresh every 30 min + on tx failure.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Penalty table -->
+    <div class="mono small muted mb-16">PENALTY STRUCTURE</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;">
+      <div class="penalty-row">
+        <div class="penalty-icon">⚡</div>
+        <div class="penalty-name">ETH balance below floor</div>
+        <div class="penalty-action" style="background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber)30">Auto-suspend · no reward</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-icon">📡</div>
+        <div class="penalty-name">5 consecutive failed health pings</div>
+        <div class="penalty-action" style="background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber)30">Auto-suspend · no reward</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-icon">🐳</div>
+        <div class="penalty-name">Running deprecated image after grace period</div>
+        <div class="penalty-action" style="background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber)30">Auto-suspend · no reward</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-icon">📉</div>
+        <div class="penalty-name">Tx success rate below 80% in a week</div>
+        <div class="penalty-action" style="background:var(--orange-dim);color:var(--orange);border:1px solid var(--orange)30">50% reward reduction</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-icon">🔁</div>
+        <div class="penalty-name">3 consecutive weeks below 90% uptime</div>
+        <div class="penalty-action" style="background:var(--pink-dim);color:var(--pink);border:1px solid var(--pink)30">10% stake slash</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-icon">🔒</div>
+        <div class="penalty-name">Stake slashed below minimum</div>
+        <div class="penalty-action" style="background:#ef444415;color:#ef4444;border:1px solid #ef444430">Auto-suspend until restaked</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ PANEL: TREASURY ══ -->
+  <div id="panel-treasury" class="panel">
+    <div class="section-title">Treasury & Vaults</div>
+    <div class="section-heading">Self-Funding Protocol Treasury</div>
+    <div class="section-desc">Every fee collected is split atomically at the smart contract level. No accumulation, no manual transfers. 5 purpose-specific vaults, each with their own rules.</div>
+
+    <!-- Vault visualization -->
+    <div class="mono small muted mb-16">FEE SPLIT — ATOMIC ON EVERY TRANSACTION</div>
+    <div class="vault-grid" style="margin-bottom:32px;">
+      <div class="vault-card" style="--vault-color:var(--teal);--fill:60%;border-color:var(--teal)30">
+        <div class="vault-icon">🏛️</div>
+        <div class="vault-pct" style="color:var(--teal)">60%</div>
+        <div class="vault-name">Operations Vault</div>
+        <div class="vault-desc">Infrastructure · keeper gas · master relayer · protocol costs</div>
+      </div>
+      <div class="vault-card" style="--vault-color:var(--blue);--fill:20%;border-color:var(--blue)30">
+        <div class="vault-icon">💧</div>
+        <div class="vault-pct" style="color:var(--blue)">20%</div>
+        <div class="vault-name">Liquidity Vault</div>
+        <div class="vault-desc">bKES stability reserve · growth capital</div>
+      </div>
+      <div class="vault-card" style="--vault-color:var(--green);--fill:10%;border-color:var(--green)30">
+        <div class="vault-icon">🎁</div>
+        <div class="vault-pct" style="color:var(--green)">10%</div>
+        <div class="vault-name">Relayer Rewards</div>
+        <div class="vault-desc">Weekly reward pool · proportional by score</div>
+      </div>
+      <div class="vault-card" style="--vault-color:var(--amber);--fill:5%;border-color:var(--amber)30">
+        <div class="vault-icon">⛽</div>
+        <div class="vault-pct" style="color:var(--amber)">5%</div>
+        <div class="vault-name">ETH Reserve</div>
+        <div class="vault-desc">Auto-converted to ETH via LP · weekly reimbursements</div>
+      </div>
+      <div class="vault-card" style="--vault-color:var(--purple);--fill:5%;border-color:var(--purple)30">
+        <div class="vault-icon">👥</div>
+        <div class="vault-pct" style="color:var(--purple)">5%</div>
+        <div class="vault-name">Team Vault</div>
+        <div class="vault-desc">Option C — threshold-based split · multisig protected</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:24px;">
+      <!-- Team vault option C -->
+      <div>
+        <div class="mono small muted mb-16">TEAM VAULT — OPTION C MODEL</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;">
+          <div class="list-item">
+            <div class="list-dot" style="background:var(--muted)"></div>
+            <div>
+              <div class="list-label">Pre-Profitability Phase</div>
+              <div class="list-desc">30-day rolling fee revenue below threshold → 100% of Team Vault goes to Company Treasury. Reinvested into growth.</div>
+            </div>
+          </div>
+          <div class="list-item">
+            <div class="list-dot" style="background:var(--green)"></div>
+            <div>
+              <div class="list-label">Post-Profitability Phase</div>
+              <div class="list-desc">Threshold crossed → automatic split kicks in: 60% Company Treasury · 40% Profit Distribution.</div>
+            </div>
+          </div>
+          <div class="list-item">
+            <div class="list-dot" style="background:var(--purple)"></div>
+            <div>
+              <div class="list-label">Profit Distribution</div>
+              <div class="list-desc">Multisig wallet · 3 of 5 signatures required · founders · lead investor · CFO. No single person can drain.</div>
+            </div>
+          </div>
+          <div class="list-item">
+            <div class="list-dot" style="background:var(--teal)"></div>
+            <div>
+              <div class="list-label">Fully Automated Phase Switch</div>
+              <div class="list-desc">Contract tracks rolling revenue. Phase switches without any human trigger.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ETH sourcing -->
+      <div>
+        <div class="mono small muted mb-16">ETH SOURCING FOR REIMBURSEMENTS</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;">
+          <div class="flow-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;width:100%;">
+              <div class="flow-node" style="border-color:var(--amber);color:var(--amber);font-size:11px;">ETH Reserve Vault<br>5% of fees in bKES/USDC</div>
+              <div class="flow-arrow colored">→</div>
+              <div class="flow-node" style="border-color:var(--blue);color:var(--blue);font-size:11px;">LP Conversion<br>USDC → ETH</div>
+              <div class="flow-arrow colored">→</div>
+              <div class="flow-node" style="border-color:var(--green);color:var(--green);font-size:11px;">Vault 2 ETH<br>Ready for payouts</div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="list-item">
+            <div class="list-dot" style="background:var(--teal)"></div>
+            <div><div class="list-label">Strategic ETH Reserve</div><div class="list-desc">Bootstrap reserve + LP auto-conversion as ongoing top-up</div></div>
+          </div>
+          <div class="list-item">
+            <div class="list-dot" style="background:var(--amber)"></div>
+            <div><div class="list-label">Target Float</div><div class="list-desc">2 weeks estimated reimbursements always maintained</div></div>
+          </div>
+          <div class="list-item">
+            <div class="list-dot" style="background:var(--pink)"></div>
+            <div><div class="list-label">LP Slippage Cap</div><div class="list-desc">Max 1% slippage on conversions · otherwise hold and retry</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tiered reward phases -->
+    <div class="mono small muted mb-16">TIERED REWARD ALLOCATION — SCALES WITH NETWORK</div>
+    <div class="grid-3">
+      <div class="stat-box" style="border-color:var(--teal)40">
+        <div class="stat-label">Phase 1 — Bootstrap</div>
+        <div class="stat-value" style="color:var(--teal)">15%</div>
+        <div class="stat-detail">→ Relayer rewards<br>0 to 50k daily txs<br>Attract early operators</div>
+      </div>
+      <div class="stat-box" style="border-color:var(--blue)40">
+        <div class="stat-label">Phase 2 — Growth</div>
+        <div class="stat-value" style="color:var(--blue)">12%</div>
+        <div class="stat-detail">→ Relayer rewards<br>50k to 150k daily txs<br>Network maturing</div>
+      </div>
+      <div class="stat-box" style="border-color:var(--purple)40">
+        <div class="stat-label">Phase 3 — Scale</div>
+        <div class="stat-value" style="color:var(--purple)">10%</div>
+        <div class="stat-detail">→ Relayer rewards<br>150k+ daily txs<br>Steady state</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ PANEL: KEEPER ══ -->
+  <div id="panel-keeper" class="panel">
+    <div class="section-title">Keeper System</div>
+    <div class="section-heading">The Autonomous Brain</div>
+    <div class="section-desc">Three continuous loops run everything. Primary + secondary failover. A watchdog on a separate server. On-chain heartbeat for public verifiability.</div>
+
+    <div class="grid-2" style="margin-bottom:24px;">
+      <div>
+        <div class="mono small muted mb-16">THREE KEEPER LOOPS</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+
+          <div class="loop-card" style="border-color:var(--teal)40">
+            <div class="loop-label" style="color:var(--teal)">Loop 1</div>
+            <div class="loop-title">Health Monitor</div>
+            <div class="loop-cadence" style="background:var(--teal-dim);color:var(--teal)">Every 60s</div>
+            <div class="small muted mb-8">Pings every approved relayer /health endpoint. Checks ETH balance. Verifies image hash.</div>
+            <div class="row">
+              <span class="tag" style="background:var(--amber-dim);color:var(--amber)">3 misses → degraded</span>
+              <span class="tag" style="background:#ef444415;color:#ef4444">5 misses → suspend</span>
+            </div>
+          </div>
+
+          <div class="loop-card" style="border-color:var(--blue)40">
+            <div class="loop-label" style="color:var(--blue)">Loop 2</div>
+            <div class="loop-title">Reinstatement Processor</div>
+            <div class="loop-cadence" style="background:var(--blue-dim);color:var(--blue)">Every 10min</div>
+            <div class="small muted mb-8">Re-runs full approval checks on all suspended relayers. Auto-reinstates on pass. DNS restored automatically.</div>
+            <div class="row">
+              <span class="tag" style="background:var(--green-dim);color:var(--green)">Pass → reinstate</span>
+              <span class="tag" style="background:var(--border);color:var(--muted2)">Fail → stay suspended</span>
+            </div>
+          </div>
+
+          <div class="loop-card" style="border-color:var(--amber)40">
+            <div class="loop-label" style="color:var(--amber)">Loop 3</div>
+            <div class="loop-title">Vault Health Monitor</div>
+            <div class="loop-cadence" style="background:var(--amber-dim);color:var(--amber)">Every hour</div>
+            <div class="small muted mb-8">Checks Vault 2 ETH balance and Vault 3 stable balances. Triggers top-ups via LP conversion when below 1-week float.</div>
+            <div class="row">
+              <span class="tag" style="background:var(--teal-dim);color:var(--teal)">Auto top-up</span>
+              <span class="tag" style="background:var(--border);color:var(--muted2)">Self-funded from Vault 1</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div>
+        <div class="mono small muted mb-16">LIVENESS ARCHITECTURE</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
+
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="background:var(--teal-dim);border:1px solid var(--teal)30;border-radius:10px;padding:14px;">
+              <div class="mono small" style="color:var(--teal);margin-bottom:6px;">PRIMARY KEEPER</div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Always active · holds Redis lock</div>
+              <div class="small muted">Executes all loops · writes on-chain heartbeat hourly · refreshes lock every 30s</div>
+            </div>
+            <div style="text-align:center;font-size:20px;color:var(--muted)">↕ monitors lock</div>
+            <div style="background:var(--blue-dim);border:1px solid var(--blue)30;border-radius:10px;padding:14px;">
+              <div class="mono small" style="color:var(--blue);margin-bottom:6px;">SECONDARY KEEPER</div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Standby · checks lock every 60s</div>
+              <div class="small muted">If lock expired → acquires it → promotes to primary instantly</div>
+            </div>
+            <div style="text-align:center;font-size:20px;color:var(--muted)">↕ monitored by</div>
+            <div style="background:var(--orange-dim);border:1px solid var(--orange)30;border-radius:10px;padding:14px;">
+              <div class="mono small" style="color:var(--orange);margin-bottom:6px;">WATCHDOG — SEPARATE SERVER</div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Ultra-lightweight · minimal deps</div>
+              <div class="small muted">Reads on-chain heartbeat · checks keeper ETH · calls topUpKeeper() · PagerDuty alert if critical</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">Keeper Monthly Gas Cost (Base L2)</div>
+          <div class="stat-value" style="color:var(--green)">~$0.54</div>
+          <div class="stat-detail">4.67M gas/day · 0.001 gwei · $4000 ETH<br>Vault 5 float of 0.01 ETH covers months</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly payout flow -->
+    <div class="mono small muted mb-16">WEEKLY PAYOUT EXECUTION — SUNDAY MIDNIGHT UTC</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;overflow-x:auto;">
+      <div class="flow-row">
+        <div class="flow-node" style="border-color:var(--indigo);color:var(--indigo);font-size:11px;">Pull all tx hashes<br>from chain events</div>
+        <div class="flow-arrow colored">→</div>
+        <div class="flow-node" style="font-size:11px;">eth_getTransactionReceipt<br>gasUsed × gasPrice</div>
+        <div class="flow-arrow colored">→</div>
+        <div class="flow-node" style="border-color:var(--amber);color:var(--amber);font-size:11px;">ETH reimbursement<br>per relayer</div>
+        <div class="flow-arrow colored">→</div>
+        <div class="flow-node" style="font-size:11px;">USD-weighted<br>stable split</div>
+        <div class="flow-arrow colored">→</div>
+        <div class="flow-node" style="font-size:11px;">Circuit breaker<br>checks</div>
+        <div class="flow-arrow colored">→</div>
+        <div class="flow-node" style="border-color:var(--green);color:var(--green);font-size:11px;">Execute payouts<br>on-chain</div>
+        <div class="flow-arrow colored">→</div>
+        <div class="flow-node" style="font-size:11px;">Score update<br>+ estimation</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ PANEL: FEE CALCULATOR ══ -->
+  <div id="panel-fees" class="panel">
+    <div class="section-title">Fee Calculator</div>
+    <div class="section-heading">Treasury Sustainability Model</div>
+    <div class="section-desc">See how fees flow into the vault system. Max 250,000 txs/day. Adjust volume and fee to see real-time treasury projections.</div>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:24px;">
+
+      <div class="grid-2" style="gap:32px;margin-bottom:28px;">
+        <div>
+          <div class="fee-slider-label">Daily Transaction Volume <span id="vol-label">125,000 txs</span></div>
+          <input type="range" min="1000" max="250000" step="1000" value="125000" id="vol-slider" oninput="calcFees()">
+          <div class="row mt-16">
+            <span class="tag" style="background:var(--border);color:var(--muted2)">Min: 1,000</span>
+            <span class="tag" style="background:var(--border);color:var(--muted2)">Max: 250,000</span>
+          </div>
+        </div>
+        <div>
+          <div class="fee-slider-label">Average Fee per Transaction <span id="fee-label">25 bKES</span></div>
+          <input type="range" min="1" max="50" step="1" value="25" id="fee-slider" oninput="calcFees()">
+          <div class="row mt-16">
+            <span class="tag" style="background:var(--border);color:var(--muted2)">Min: 1 bKES</span>
+            <span class="tag" style="background:var(--border);color:var(--muted2)">Max: 50 bKES</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="grid-4" style="margin-bottom:24px;">
+        <div class="stat-box" style="border-color:var(--teal)40">
+          <div class="stat-label">Daily Fees</div>
+          <div class="stat-value" style="color:var(--teal)" id="daily-fees">—</div>
+          <div class="stat-detail" id="daily-usd">—</div>
+        </div>
+        <div class="stat-box" style="border-color:var(--blue)40">
+          <div class="stat-label">Weekly Fees</div>
+          <div class="stat-value" style="color:var(--blue)" id="weekly-fees">—</div>
+          <div class="stat-detail" id="weekly-usd">—</div>
+        </div>
+        <div class="stat-box" style="border-color:var(--purple)40">
+          <div class="stat-label">Monthly Fees</div>
+          <div class="stat-value" style="color:var(--purple)" id="monthly-fees">—</div>
+          <div class="stat-detail" id="monthly-usd">—</div>
+        </div>
+        <div class="stat-box" style="border-color:var(--green)40">
+          <div class="stat-label">Sustainability Ratio</div>
+          <div class="stat-value" style="color:var(--green)" id="sustain-ratio">—</div>
+          <div class="stat-detail">Revenue vs relayer costs</div>
+        </div>
+      </div>
+
+      <!-- Per vault breakdown -->
+      <div class="mono small muted mb-16">WEEKLY VAULT ALLOCATION</div>
+      <div class="fee-result-grid">
+        <div class="fee-result-box" style="border-color:var(--teal)30">
+          <div class="fee-result-pct">60% — Operations</div>
+          <div class="fee-result-val" style="color:var(--teal)" id="v-ops">—</div>
+          <div class="fee-result-name">bKES / week</div>
+        </div>
+        <div class="fee-result-box" style="border-color:var(--blue)30">
+          <div class="fee-result-pct">20% — Liquidity</div>
+          <div class="fee-result-val" style="color:var(--blue)" id="v-liq">—</div>
+          <div class="fee-result-name">bKES / week</div>
+        </div>
+        <div class="fee-result-box" style="border-color:var(--green)30">
+          <div class="fee-result-pct">10% — Rewards</div>
+          <div class="fee-result-val" style="color:var(--green)" id="v-rew">—</div>
+          <div class="fee-result-name">bKES / week (~$<span id="v-rew-usd">—</span>)</div>
+        </div>
+        <div class="fee-result-box" style="border-color:var(--amber)30">
+          <div class="fee-result-pct">5% — ETH Reserve</div>
+          <div class="fee-result-val" style="color:var(--amber)" id="v-eth">—</div>
+          <div class="fee-result-name">bKES → ETH / week</div>
+        </div>
+        <div class="fee-result-box" style="border-color:var(--purple)30">
+          <div class="fee-result-pct">5% — Team</div>
+          <div class="fee-result-val" style="color:var(--purple)" id="v-team">—</div>
+          <div class="fee-result-name">bKES / week</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="grid-3">
+        <div class="stat-box">
+          <div class="stat-label">Weekly ETH Reimbursement Cost</div>
+          <div class="stat-value" style="color:var(--amber)" id="eth-cost">—</div>
+          <div class="stat-detail" id="eth-coverage">Base L2 ~$0.0007/tx</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">ETH Reserve Coverage</div>
+          <div class="stat-value" style="color:var(--green)" id="eth-ratio">—</div>
+          <div class="stat-detail">Reserve collected vs actual cost</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Per Relayer Weekly Reward</div>
+          <div class="stat-value" style="color:var(--blue)" id="per-relayer">—</div>
+          <div class="stat-detail">Assuming 20 active relayers</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══ PANEL: SELF-HEALING ══ -->
+  <div id="panel-healing" class="panel">
+    <div class="section-title">Self-Healing Model</div>
+    <div class="section-heading">Every Failure Has an Automated Recovery</div>
+    <div class="section-desc">The system detects, responds, and recovers from every failure mode without a human present. This is the full failure → recovery map.</div>
+
+    <!-- Live status board -->
+    <div class="status-board mb-24">
+      <div class="status-header">
+        <div class="status-live"></div>
+        <div class="status-title">System Status Board</div>
+        <div class="status-time" id="live-time">—</div>
+      </div>
+      <div class="grid-4">
+        <div>
+          <div class="health-row"><div class="health-dot" style="background:var(--green)"></div><div class="health-name">Keeper Primary</div><div class="health-status" style="background:var(--green-dim);color:var(--green)">ACTIVE</div></div>
+          <div class="health-row"><div class="health-dot" style="background:var(--green)"></div><div class="health-name">Keeper Secondary</div><div class="health-status" style="background:var(--green-dim);color:var(--green)">STANDBY</div></div>
+          <div class="health-row"><div class="health-dot" style="background:var(--green)"></div><div class="health-name">Watchdog</div><div class="health-status" style="background:var(--green-dim);color:var(--green)">WATCHING</div></div>
+        </div>
+        <div>
+          <div class="health-row"><div class="health-dot" style="background:var(--green)"></div><div class="health-name">Master Relayer</div><div class="health-status" style="background:var(--green-dim);color:var(--green)">HEALTHY</div></div>
+          <div class="health-row"><div class="health-dot" style="background:var(--green)"></div><div class="health-name">Gateway Contract</div><div class="health-status" style="background:var(--green-dim);color:var(--green)">LIVE</div></div>
+          <div class="health-row"><div class="health-dot" style="background:var(--green)"></div><div class="health-name">Fee Split Contract</div><div class="health-status" style="background:var(--green-dim);color:var(--green)">LIVE</div></div>
+        </div>
+        <div>
+          <div class="health-row"><div class="health-dot" style="background:var(--green)"></div><div class="health-name">Vault 1 — Ops</div><div class="health-status" style="background:var(--green-dim);color:var(--green)">FUNDED</div></div>
+          <div class="health-row"><div class="health-dot" style="background:var(--green)"></div><div class="health-name">Vault 2 — ETH</div><div class="health-status" style="background:var(--green-dim);color:var(--green)">FUNDED</div></div>
+          <div class="health-row"><div class="health-dot" style="background:var(--green)"></div><div class="health-name">Vault 3 — Rewards</div><div class="health-status" style="background:var(--green-dim);color:var(--green)">FUNDED</div></div>
+        </div>
+        <div>
+          <div class="health-row"><div class="health-dot" style="background:var(--green)"></div><div class="health-name">Payout Service</div><div class="health-status" style="background:var(--green-dim);color:var(--green)">SCHEDULED</div></div>
+          <div class="health-row"><div class="health-dot" style="background:var(--green)"></div><div class="health-name">DNS Automation</div><div class="health-status" style="background:var(--green-dim);color:var(--green)">ACTIVE</div></div>
+          <div class="health-row"><div class="health-dot" style="background:var(--green)"></div><div class="health-name">LP Integration</div><div class="health-status" style="background:var(--green-dim);color:var(--green)">CONNECTED</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Failure recovery table -->
+    <div class="mono small muted mb-16">FAILURE → DETECTION → RECOVERY MAP</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+
+      <div class="card" style="--accent:var(--teal)" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon" style="background:var(--teal-dim);font-size:18px;">📡</div>
+          <div><div class="card-title">Community Relayer Goes Offline</div><div class="card-sub">Detection: Loop 1 health monitor · 5 missed pings</div></div>
+          <div class="card-chevron">⌄</div>
+        </div>
+        <div class="card-body">
+          <div class="flow-row" style="flex-wrap:wrap;gap:8px;">
+            <div class="flow-node" style="font-size:11px;border-color:var(--pink);color:var(--pink)">Relayer offline</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;">5 pings missed<br>in 5 minutes</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--amber);color:var(--amber)">Keeper calls<br>suspendRelayer()</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;">DNS suspended<br>Removed from list</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--green);color:var(--green)">Mobile failover<br>to next relayer</div>
+          </div>
+          <div class="divider"></div>
+          <div class="small muted">When operator fixes: Loop 2 detects health restored → calls reinstateRelayer() → DNS restored → back on approved list. Zero human involvement.</div>
+        </div>
+      </div>
+
+      <div class="card" style="--accent:var(--amber)" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon" style="background:var(--amber-dim);font-size:18px;">⛽</div>
+          <div><div class="card-title">Relayer ETH Balance Drops Below Floor</div><div class="card-sub">Detection: Loop 1 ETH balance check every 60s</div></div>
+          <div class="card-chevron">⌄</div>
+        </div>
+        <div class="card-body">
+          <div class="flow-row" style="flex-wrap:wrap;gap:8px;">
+            <div class="flow-node" style="font-size:11px;border-color:var(--pink);color:var(--pink)">ETH below floor</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--amber);color:var(--amber)">Instant suspend<br>no reward week</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;">Operator tops up<br>their own ETH</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--green);color:var(--green)">Loop 2 detects<br>balance restored</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;">Reinstate + back<br>on approved list</div>
+          </div>
+          <div class="divider"></div>
+          <div class="small muted">Operator is incentivised to top up fast — they earn no rewards while suspended. Self-correcting behaviour.</div>
+        </div>
+      </div>
+
+      <div class="card" style="--accent:var(--blue)" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon" style="background:var(--blue-dim);font-size:18px;">🐳</div>
+          <div><div class="card-title">Relayer Running Deprecated Image</div><div class="card-sub">Detection: Image hash check on /health response</div></div>
+          <div class="card-chevron">⌄</div>
+        </div>
+        <div class="card-body">
+          <div class="flow-row" style="flex-wrap:wrap;gap:8px;">
+            <div class="flow-node" style="font-size:11px;border-color:var(--pink);color:var(--pink)">New image hash<br>published on-chain</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--amber);color:var(--amber)">48hr grace<br>period starts</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;">Old hash relayers<br>get flagged</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--pink);color:var(--pink)">Auto-suspend<br>after 48hrs</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--green);color:var(--green)">Operator pulls<br>new image → reinstate</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="--accent:var(--indigo)" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon" style="background:var(--purple-dim);font-size:18px;">⚙️</div>
+          <div><div class="card-title">Keeper Primary Goes Down</div><div class="card-sub">Detection: Redis lock TTL expires · secondary promotes</div></div>
+          <div class="card-chevron">⌄</div>
+        </div>
+        <div class="card-body">
+          <div class="flow-row" style="flex-wrap:wrap;gap:8px;">
+            <div class="flow-node" style="font-size:11px;border-color:var(--pink);color:var(--pink)">Primary crashes</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;">Lock TTL expires<br>in 30s</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--blue);color:var(--blue)">Secondary acquires<br>lock → promotes</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--green);color:var(--green)">All loops resume<br>within 60s</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;">Alert fires to<br>engineering</div>
+          </div>
+          <div class="divider"></div>
+          <div class="small muted">Maximum downtime: 60 seconds. All keeper functions resume automatically. Alert is informational, not urgent — system is already recovered.</div>
+        </div>
+      </div>
+
+      <div class="card" style="--accent:var(--green)" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon" style="background:var(--green-dim);font-size:18px;">🏦</div>
+          <div><div class="card-title">Vault ETH Reserve Running Low</div><div class="card-sub">Detection: Loop 3 hourly vault balance check</div></div>
+          <div class="card-chevron">⌄</div>
+        </div>
+        <div class="card-body">
+          <div class="flow-row" style="flex-wrap:wrap;gap:8px;">
+            <div class="flow-node" style="font-size:11px;border-color:var(--amber);color:var(--amber)">Vault 2 ETH<br>below 1-week float</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;">Keeper pulls USDC<br>from Vault 1</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--blue);color:var(--blue)">LP swap<br>USDC → ETH</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--green);color:var(--green)">Vault 2 topped<br>to 2-week float</div>
+          </div>
+          <div class="divider"></div>
+          <div class="small muted">Circuit breaker: max 1% LP slippage. If exceeded → hold conversion and retry next hour. Vault 1 never drained below 30-day reserve floor.</div>
+        </div>
+      </div>
+
+      <div class="card" style="--accent:var(--pink)" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon" style="background:var(--pink-dim);font-size:18px;">💱</div>
+          <div><div class="card-title">FX Circuit Breaker Triggers on Payout Day</div><div class="card-sub">Detection: Payout service checks KES/USD 7-day average deviation</div></div>
+          <div class="card-chevron">⌄</div>
+        </div>
+        <div class="card-body">
+          <div class="flow-row" style="flex-wrap:wrap;gap:8px;">
+            <div class="flow-node" style="font-size:11px;border-color:var(--pink);color:var(--pink)">KES/USD moves<br>&gt;5% from avg</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--amber);color:var(--amber)">bKES reward<br>portion held</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;border-color:var(--green);color:var(--green)">USDC reward<br>pays normally</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;">Retry bKES<br>next day</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="font-size:11px;">Alert to<br>finance team</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- end wrap -->
+
+<script>
+// Panel switching
+function showPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Card toggle
+function toggleCard(card) {
+  card.classList.toggle('expanded');
+}
+
+// Live clock
+function updateTime() {
+  const el = document.getElementById('live-time');
+  if (el) el.textContent = new Date().toUTCString().replace(' GMT', ' UTC');
+}
+updateTime();
+setInterval(updateTime, 1000);
+
+// Fee calculator
+const KES_USD = 130;
+
+function fmt(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(0) + 'K';
+  return n.toFixed(0);
+}
+
+function calcFees() {
+  const vol = parseInt(document.getElementById('vol-slider').value);
+  const fee = parseInt(document.getElementById('fee-slider').value);
+
+  document.getElementById('vol-label').textContent = vol.toLocaleString() + ' txs';
+  document.getElementById('fee-label').textContent = fee + ' bKES';
+
+  const dailyBkes = vol * fee;
+  const weeklyBkes = dailyBkes * 7;
+  const monthlyBkes = dailyBkes * 30;
+
+  const dailyUsd = dailyBkes / KES_USD;
+  const weeklyUsd = weeklyBkes / KES_USD;
+  const monthlyUsd = monthlyBkes / KES_USD;
+
+  document.getElementById('daily-fees').textContent = fmt(dailyBkes) + ' bKES';
+  document.getElementById('daily-usd').textContent = '~$' + dailyUsd.toFixed(0) + ' USD/day';
+  document.getElementById('weekly-fees').textContent = fmt(weeklyBkes) + ' bKES';
+  document.getElementById('weekly-usd').textContent = '~$' + weeklyUsd.toFixed(0) + ' USD/week';
+  document.getElementById('monthly-fees').textContent = fmt(monthlyBkes) + ' bKES';
+  document.getElementById('monthly-usd').textContent = '~$' + monthlyUsd.toFixed(0) + ' USD/month';
+
+  // Vault splits weekly
+  document.getElementById('v-ops').textContent = fmt(weeklyBkes * 0.60);
+  document.getElementById('v-liq').textContent = fmt(weeklyBkes * 0.20);
+  document.getElementById('v-rew').textContent = fmt(weeklyBkes * 0.10);
+  document.getElementById('v-rew-usd').textContent = (weeklyBkes * 0.10 / KES_USD).toFixed(0);
+  document.getElementById('v-eth').textContent = fmt(weeklyBkes * 0.05);
+  document.getElementById('v-team').textContent = fmt(weeklyBkes * 0.05);
+
+  // ETH cost
+  const weeklyEthCostUsd = vol * 7 * 0.0007;
+  const ethReserveUsd = (weeklyBkes * 0.05) / KES_USD;
+  const ethRatio = ethReserveUsd / weeklyEthCostUsd;
+  document.getElementById('eth-cost').textContent = '$' + weeklyEthCostUsd.toFixed(0);
+  document.getElementById('eth-ratio').textContent = ethRatio.toFixed(1) + 'x';
+
+  // Per relayer reward
+  const rewardPoolUsd = (weeklyBkes * 0.10) / KES_USD;
+  const perRelayer = rewardPoolUsd / 20;
+  document.getElementById('per-relayer').textContent = '$' + perRelayer.toFixed(0);
+
+  // Sustainability ratio
+  const totalRelayerCost = weeklyEthCostUsd + rewardPoolUsd;
+  const ratio = weeklyUsd / totalRelayerCost;
+  document.getElementById('sustain-ratio').textContent = ratio.toFixed(0) + 'x';
+}
+
+calcFees();
+
+// Animate vault fill on treasury panel open
+document.querySelector('[onclick="showPanel(\'treasury\',this)"]').addEventListener('click', () => {
+  setTimeout(() => {
+    document.querySelectorAll('.vault-card').forEach(v => {
+      const fill = v.style.getPropertyValue('--fill');
+      v.style.setProperty('--fill', '0%');
+      setTimeout(() => v.style.setProperty('--fill', fill), 100);
+    });
+  }, 100);
+});
+</script>
+</body>
+</html>

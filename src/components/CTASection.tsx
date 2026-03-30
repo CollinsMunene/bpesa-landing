@@ -1,80 +1,76 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Download } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, Smartphone } from "lucide-react";
 
-const CTASection = () => {
-  return (
-    <section className="py-20 px-4 lg:px-8" id="CTA">
-      <div className="max-w-4xl mx-auto text-center">
-        <div className="relative">
-          {/* Background elements */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary-glow/10 to-primary/10 rounded-3xl blur-3xl"></div>
-
-          <div className="relative bg-gradient-to-br from-primary to-primary-glow rounded-3xl p-12 lg:p-16 text-primary-foreground">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-              Ready to Take Control?
-            </h2>
-            <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-              Join our global network of users and agents. Send money across
-              borders, earn from providing liquidity, and experience true
-              financial freedom.
+const CTASection = () => (
+  <section id="cta" className="py-24 px-4 lg:px-8 bg-white">
+    <div className="max-w-6xl mx-auto">
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Users */}
+        <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-8 md:p-10 text-white flex flex-col gap-6">
+          <div className="w-12 h-12 bg-white/15 rounded-2xl flex items-center justify-center">
+            <Smartphone className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <p className="text-white/60 text-sm font-medium mb-2">For users</p>
+            <h3 className="text-2xl font-bold mb-3">Start recieving money.<br />No bank needed.</h3>
+            <p className="text-white/70 text-sm leading-relaxed">
+              Download Bpesa, create your wallet in 2 minutes, and send money anywhere - to any Bpesa number, at near-zero fees.
             </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-              {/* <Button
-                variant="secondary"
-                size="lg"
-                className="text-lg px-8 py-3 bg-white text-primary hover:bg-white/90"
-              >
-                <Download className="w-5 h-5 mr-2" />
-                Download for iOS
-              </Button> */}
-              
-              <Link to="https://play.google.com/store/apps/details?id=com.devligence.bpesa_main" target="_blank" rel="noopener noreferrer">
-              <Button
-                variant="secondary"
-                size="lg"
-                className="text-lg px-8 py-3 bg-white text-primary hover:bg-white/90"
-              >
-                <Download className="w-5 h-5 mr-2" />
-                Download User App (Android)
+          </div>
+          <div className="flex flex-col gap-3">
+            <a href="/download">
+              <Button size="lg" className="w-full bg-white text-primary hover:bg-white/90 font-bold gap-2 rounded-xl">
+                Download Bpesa <ArrowRight className="w-4 h-4" />
               </Button>
-              </Link>
+            </a>
+            <p className="text-white/50 text-xs text-center">Android · iOS coming soon · Huawei coming soon</p>
+          </div>
+        </div>
 
-              <Link to="https://play.google.com/store/apps/details?id=com.devligence.bpesa_agent" target="_blank" rel="noopener noreferrer">
-              <Button
-                variant="secondary"
-                size="lg"
-                className="text-lg px-8 py-3 bg-white text-primary hover:bg-white/90"
-              >
-                <Download className="w-5 h-5 mr-2" />
-                Download Agent App (Android)
+        {/* Agents */}
+        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 md:p-10 text-white flex flex-col gap-6 border border-emerald-500/20">
+          <div className="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center">
+            <span className="text-2xl">🏪</span>
+          </div>
+          <div>
+            <p className="text-emerald-400 text-sm font-medium mb-2">For agents</p>
+            <h3 className="text-2xl font-bold mb-3">Run your own<br />Bpesa agent location.</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Earn commissions on every transaction you process. Top agents earn KES 20,000+ per month. Download the agent app and apply today.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <a href="/download?app=agent">
+              <Button size="lg" className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold gap-2 rounded-xl">
+                Download Agent App <ArrowRight className="w-4 h-4" />
               </Button>
-              </Link>
-            </div>
-
-            {/* <Link to="/waitlist">
-              <Button
-                variant="outline"
-                size="lg"
-                className="text-lg text-primary px-8 py-3 border-white hover:bg-white hover:text-primary"
-              >
-                Join Our Waitlist
-                <ArrowRight className="w-5 h-5 ml-2" />
+            </a>
+            <a href="/transaction_bands">
+              <Button size="lg" variant="outline" className="w-full bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white rounded-xl gap-2">
+                View commission rates <ArrowRight className="w-4 h-4" />
               </Button>
-            </Link> */}
-
-            <div className="mt-8 text-sm opacity-75">
-              <p>
-                Available on Android • iOS coming soon • Agent network in 50+ countries •
-                Near Zero transaction fees
-              </p>
-            </div>
+            </a>
           </div>
         </div>
       </div>
-    </section>
-  );
-};
+
+      {/* Bottom trust strip */}
+      <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm text-slate-400">
+        {[
+          "Available on Android",
+          "iOS coming soon",
+          "Agent network in 50+ countries",
+          "Near-zero transaction fees",
+          "Built in Africa, for the world",
+        ].map((t) => (
+          <span key={t} className="flex items-center gap-2">
+            <span className="w-1 h-1 bg-slate-300 rounded-full" />
+            {t}
+          </span>
+        ))}
+      </div>
+    </div>
+  </section>
+);
 
 export default CTASection;

@@ -1,23 +1,266 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E05LVVKZBG"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-E05LVVKZBG');
+    </script>
+
+    <!-- Core -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bpesa</title>
-    <meta name="description" content="Borderless money transfer powered by an agentic infrastructure" />
-    <meta name="author" content="collinshillary1@gmail.com" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <link rel="canonical" href="https://bpesa.net" />
 
-    <meta property="og:title" content="Bpesa" />
-    <meta property="og:description" content="Borderless money transfer powered by an agentic infrastructure" />
+    <!-- Primary Meta -->
+    <title>Bpesa — Send Money, Save, and Earn on Open Money Rails in Africa</title>
+    <meta name="description" content="Bpesa is the programmable financial network for Africa. Send money instantly, earn on savings, and access agent cash-in/out — all built on transparent, open money infrastructure." />
+    <meta name="keywords" content="Bpesa, send money Africa, mobile money, open money, P2P transfers Kenya, agent banking, financial network, programmable money, save and earn, merchant payments Africa" />
+    <meta name="author" content="BytePesa Ltd" />
+    <meta name="theme-color" content="#0f172a" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/favicon.ico" />
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="" />
+    <meta property="og:site_name" content="Bpesa" />
+    <meta property="og:url" content="https://bpesa.net" />
+    <meta property="og:title" content="Bpesa — Send Money, Save, and Earn on Open Money Rails in Africa" />
+    <meta property="og:description" content="The programmable financial network for Africa. P2P transfers, savings, agent cash-in/out, and merchant payments — built on open, transparent infrastructure." />
+    <meta property="og:image" content="https://bpesa.net/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Bpesa — The financial network built on open money" />
+    <meta property="og:locale" content="en_KE" />
 
+    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@Bpesa1" />
-    <meta name="twitter:image" content="" />
-    
+    <meta name="twitter:creator" content="@bpesaplatform" />
+    <meta name="twitter:title" content="Bpesa — Send Money, Save, and Earn on Open Money Rails" />
+    <meta name="twitter:description" content="The programmable financial network for Africa. P2P transfers, savings, agent cash-in/out, and merchant payments on open infrastructure." />
+    <meta name="twitter:image" content="https://bpesa.net/og-image.png" />
+
+    <!-- Geo targeting -->
+    <meta name="geo.region" content="KE" />
+    <meta name="geo.placename" content="Kenya" />
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+
     <!-- jQuery for Mailchimp form validation -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://bpesa.net/#organization",
+          "name": "Bpesa",
+          "alternateName": "BytePesa",
+          "url": "https://bpesa.net",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://bpesa.net/favicon.ico",
+            "width": 512,
+            "height": 512
+          },
+          "description": "Bpesa is the programmable financial network for Africa, built on open money infrastructure. It provides P2P money transfers, savings with earnings, agent cash-in/out services, and merchant payment solutions.",
+          "foundingLocation": {
+            "@type": "Place",
+            "name": "Kenya"
+          },
+          "areaServed": [
+            { "@type": "Country", "name": "Kenya" },
+            { "@type": "Continent", "name": "Africa" }
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "info@bpesa.net",
+            "contactType": "customer support",
+            "availableLanguage": ["English", "Swahili"]
+          },
+          "sameAs": [
+            "https://x.com/bpesaplatform",
+            "https://x.com/Bpesa1",
+            "https://linkedin.com/company/bpesaplatform"
+          ],
+          "parentOrganization": {
+            "@type": "Organization",
+            "name": "BytePesa Ltd",
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "KE"
+            }
+          }
+        },
+        {
+          "@type": "FinancialService",
+          "@id": "https://bpesa.net/#service",
+          "name": "Bpesa Financial Network",
+          "provider": { "@id": "https://bpesa.net/#organization" },
+          "url": "https://bpesa.net",
+          "description": "A programmable money layer for Africa offering P2P transfers, savings accounts with earnings, agent cash-in/cash-out, and merchant payment acceptance — all on open, non-custodial infrastructure.",
+          "serviceType": "Mobile Money / Digital Financial Services",
+          "areaServed": { "@type": "Continent", "name": "Africa" },
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Bpesa Products",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "P2P Transfers",
+                  "description": "Send and receive money instantly to anyone, peer-to-peer, with no bank required."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Save & Earn",
+                  "description": "Save money and earn returns on your balance within the Bpesa network."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Agent Cash In / Cash Out",
+                  "description": "Access physical cash through a growing network of Bpesa agents across Africa."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Merchant Payments",
+                  "description": "Accept digital payments from customers as a business using the Bpesa merchant network."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://bpesa.net/#website",
+          "url": "https://bpesa.net",
+          "name": "Bpesa",
+          "description": "The financial network built on open money",
+          "publisher": { "@id": "https://bpesa.net/#organization" },
+          "inLanguage": "en-KE",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://bpesa.net/?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://bpesa.net/#webpage",
+          "url": "https://bpesa.net",
+          "name": "Bpesa — Send Money, Save, and Earn on Open Money Rails in Africa",
+          "isPartOf": { "@id": "https://bpesa.net/#website" },
+          "about": { "@id": "https://bpesa.net/#organization" },
+          "description": "Bpesa is the programmable financial network for Africa — send money, save and earn, access agents, and accept payments on open money infrastructure.",
+          "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://bpesa.net"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://bpesa.net/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is Bpesa?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Bpesa is a programmable financial network for Africa built on open money infrastructure. It enables peer-to-peer money transfers, savings with earnings, agent cash-in/cash-out services, and merchant payments — all without requiring a traditional bank account."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is open money?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Open money refers to a non-custodial, transparent, and programmable financial infrastructure where users retain control of their funds. Unlike traditional banking, open money systems allow anyone to transact, save, and build financial products without intermediaries holding their assets."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I send money with Bpesa?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "You can send money peer-to-peer through the Bpesa mobile app. Simply enter the recipient's details and amount — no bank account required. Transfers are near-instant on the Bpesa network."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I become a Bpesa agent?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Bpesa agents provide cash-in and cash-out services at physical locations. To become an agent, download the Bpesa app or contact info@bpesa.net to learn about running your own Bpesa agent location and earning from every transaction."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is Bpesa available outside Kenya?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Bpesa is currently focused on Kenya and is expanding across Africa. The platform is built to support multiple currencies and cross-border transactions as the network grows."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does Bpesa keep my money safe?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Bpesa is built on non-custodial, transparent infrastructure — meaning the protocol is auditable and users maintain control of their funds. All transactions are logged on-chain for full transparency."
+              }
+            }
+          ]
+        },
+        {
+          "@type": "MobileApplication",
+          "@id": "https://bpesa.net/#app",
+          "name": "Bpesa",
+          "operatingSystem": "Android, iOS",
+          "applicationCategory": "FinanceApplication",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "description": "The Bpesa mobile app — send money, save and earn, find agents, and accept payments on the open money network for Africa.",
+          "author": { "@id": "https://bpesa.net/#organization" },
+          "downloadUrl": "https://bpesa.net/download"
+        }
+      ]
+    }
+    </script>
   </head>
 
   <body>

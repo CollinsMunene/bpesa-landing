@@ -1,6 +1,12 @@
 import { Star } from "lucide-react";
 
 const partners = [
+   {
+    name: "Pretium",
+    type: "Super Agent",
+    logo: "/partners/pretium.webp",
+    website: "https://pretium.africa"
+  },
   {
     name: "ElementPay",
     type: "Super Agent",

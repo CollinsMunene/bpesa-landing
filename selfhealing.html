@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bpesa — Interactive Component Map</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9fafb;
+  --white: #ffffff;
+  --border: #e5e9f2;
+  --border2: #cdd4e6;
+  --text: #0d1220;
+  --muted: #64748b;
+  --muted2: #94a3b8;
+
+  /* Component colors */
+  --c-user:    #0891b2;
+  --c-agent:   #0d9488;
+  --c-merchant:#7c3aed;
+  --c-relayer: #2563eb;
+  --c-master:  #1d4ed8;
+  --c-mobile:  #db2777;
+  --c-gateway: #4338ca;
+  --c-bkes:    #059669;
+  --c-fee:     #d97706;
+  --c-pretium: #c2410c;
+  --c-lp:      #9333ea;
+  --c-keeper:  #0f766e;
+  --c-vaults:  #b45309;
+  --c-smileid: #be185d;
+  --c-dns:     #475569;
+  --c-watchdog:#7c2d12;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'Outfit', sans-serif;
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top bar ── */
+.topbar {
+  height: 56px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 20px;
+  flex-shrink: 0;
+  z-index: 100;
+}
+.logo {
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px; font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+.logo em { font-style: italic; color: #2563eb; }
+.topbar-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; color: var(--muted);
+  letter-spacing: 1.5px; text-transform: uppercase;
+}
+.topbar-hint {
+  margin-left: auto;
+  font-size: 12px; color: var(--muted2);
+  font-family: 'DM Mono', monospace;
+  display: flex; align-items: center; gap: 8px;
+}
+.hint-dot { width: 8px; height: 8px; border-radius: 50%; background: #2563eb; animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.reset-btn {
+  padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--border); background: var(--white);
+  color: var(--muted); transition: all 0.15s; font-family: 'DM Mono', monospace;
+}
+.reset-btn:hover { border-color: var(--text); color: var(--text); }
+
+/* ── Main layout ── */
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Canvas ── */
+.canvas-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+}
+.canvas-wrap:active { cursor: grabbing; }
+
+#canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+}
+
+/* SVG edges */
+.edge {
+  stroke: var(--border2);
+  stroke-width: 1.5;
+  fill: none;
+  transition: stroke 0.2s, stroke-width 0.2s, opacity 0.2s;
+}
+.edge.highlighted {
+  stroke-width: 2.5;
+  opacity: 1;
+}
+.edge.dimmed { opacity: 0.08; }
+
+/* Animated flow packet along edge */
+.flow-dot {
+  r: 4;
+  fill: var(--border2);
+  opacity: 0;
+}
+.flow-dot.active {
+  opacity: 1;
+  animation: flowMove var(--dur, 2s) linear var(--delay, 0s) infinite;
+}
+@keyframes flowMove {
+  0%   { offset-distance: 0%;   opacity: 0; }
+  5%   { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* ── Component nodes ── */
+.node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: transform 0.15s, filter 0.15s;
+  user-select: none;
+}
+.node:hover { transform: translate(-50%, -50%) scale(1.05); }
+.node.selected { transform: translate(-50%, -50%) scale(1.08); filter: drop-shadow(0 4px 16px rgba(0,0,0,0.18)); }
+.node.dimmed { opacity: 0.2; pointer-events: none; }
+
+.node-inner {
+  background: var(--white);
+  border: 2px solid var(--node-color, var(--border2));
+  border-radius: 12px;
+  padding: 10px 14px;
+  min-width: 120px;
+  max-width: 148px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s;
+}
+.node.selected .node-inner {
+  box-shadow: 0 0 0 3px var(--node-color, var(--border2)), 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.node-icon { font-size: 22px; margin-bottom: 4px; display: block; }
+.node-name { font-size: 12px; font-weight: 700; line-height: 1.3; color: var(--text); }
+.node-sub { font-size: 9.5px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; line-height: 1.35; }
+.node-tag {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  font-size: 8.5px; font-family: 'DM Mono', monospace; font-weight: 700;
+  padding: 2px 7px; border-radius: 10px; white-space: nowrap;
+  background: var(--node-color, var(--border2));
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+/* Layer labels */
+.layer-label {
+  position: absolute;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted2);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Layer bands */
+.layer-band {
+  position: absolute;
+  left: 0; right: 0;
+  border-top: 1px dashed var(--border);
+  pointer-events: none;
+}
+
+/* ── Detail panel ── */
+.detail-panel {
+  width: 320px;
+  min-width: 320px;
+  background: var(--white);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.3s ease;
+}
+.detail-panel.hidden {
+  width: 0; min-width: 0;
+  border-left: none;
+}
+
+.panel-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; color: var(--muted2); gap: 12px; padding: 40px;
+  text-align: center;
+}
+.panel-empty-icon { font-size: 40px; opacity: 0.4; }
+.panel-empty-text { font-size: 13px; font-family: 'DM Mono', monospace; line-height: 1.6; }
+
+.panel-content { display: none; flex-direction: column; height: 100%; overflow-y: auto; }
+.panel-content.active { display: flex; }
+
+.panel-header {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.panel-icon { font-size: 28px; margin-bottom: 8px; }
+.panel-name { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 3px; }
+.panel-type {
+  font-size: 9.5px; font-family: 'DM Mono', monospace; font-weight: 700;
+  padding: 3px 8px; border-radius: 4px; display: inline-block;
+  letter-spacing: 1px; margin-bottom: 8px;
+}
+.panel-desc { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+
+.panel-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.panel-section:last-child { border-bottom: none; }
+.panel-section-title {
+  font-size: 9.5px; font-family: 'DM Mono', monospace; font-weight: 700;
+  color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.resp-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 0; font-size: 12px; line-height: 1.5;
+  border-bottom: 1px solid var(--border);
+}
+.resp-item:last-child { border-bottom: none; }
+.resp-dot { width: 5px; height: 5px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+.resp-text { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 11px; }
+
+.conn-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; border-radius: 8px; margin-bottom: 4px;
+  font-size: 12px; cursor: pointer; transition: background 0.15s;
+  border: 1px solid var(--border);
+}
+.conn-item:hover { background: var(--bg); }
+.conn-item-icon { font-size: 14px; flex-shrink: 0; }
+.conn-item-name { font-weight: 600; flex: 1; }
+.conn-item-rel { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.conn-arrow-icon { color: var(--muted2); font-size: 12px; }
+
+.flow-tag {
+  display: inline-block; font-size: 10px; font-family: 'DM Mono', monospace;
+  padding: 3px 8px; border-radius: 12px; margin: 3px 3px 0 0;
+  font-weight: 500; border: 1px solid transparent;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.flow-tag:hover { opacity: 0.75; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">B<em>pesa</em></div>
+  <div class="topbar-title">Interactive Component Map</div>
+  <div class="topbar-hint">
+    <div class="hint-dot"></div>
+    Click any component to explore connections
+  </div>
+  <button class="reset-btn" onclick="resetSelection()">Reset view</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- CANVAS -->
+  <div class="canvas-wrap" id="canvasWrap">
+    <svg id="svgLayer" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible;pointer-events:none;">
+      <defs>
+        <marker id="arr-default" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L6,3 z" fill="#cdd4e6"/>
+        </marker>
+        <marker id="arr-hl" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L6,3 z" fill="currentColor" class="arr-hl-path"/>
+        </marker>
+      </defs>
+      <g id="edgesGroup"></g>
+      <g id="dotsGroup"></g>
+    </svg>
+    <div id="nodesLayer" style="position:absolute;top:0;left:0;width:100%;height:100%;"></div>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel hidden" id="detailPanel">
+    <div class="panel-empty" id="panelEmpty">
+      <div class="panel-empty-icon">⬡</div>
+      <div class="panel-empty-text">Click any component on the map to see its responsibilities, connections, and which flows it participates in.</div>
+    </div>
+    <div class="panel-content" id="panelContent"></div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+
+const COMPONENTS = {
+  user: {
+    id: 'user', icon: '👤', name: 'User',
+    sub: '10-digit account · non-custodial wallet',
+    tag: 'END USER', color: 'var(--c-user)',
+    layer: 'actors',
+    desc: 'The end user of the Bpesa app. Holds bKES or USDC in a non-custodial wallet. Never holds ETH — gas is handled entirely by relayers via meta-transactions.',
+    type: 'External Actor',
+    responsibilities: [
+      'Signs EIP-712 typed payloads locally (zero ETH needed)',
+      'Selects recipient by 10-digit account number',
+      'Receives push notification on tx confirmation',
+      'Opts into Save & Earn yield strategies',
+    ],
+    flows: ['Transaction Flow', 'Deposit via M-Pesa', 'Withdrawal', 'Save & Earn'],
+  },
+  agent: {
+    id: 'agent', icon: '🏪', name: 'Agent',
+    sub: '6-digit code · cash on/off ramp',
+    tag: 'COMMUNITY', color: 'var(--c-agent)',
+    layer: 'actors',
+    desc: 'Community cash agents who hold bKES float and provide cash-in/cash-out services. Earn commission on deposits and yield via Save & Earn on idle float.',
+    type: 'External Actor',
+    responsibilities: [
+      'Receives cash, credits user bKES wallet on deposit',
+      'Hands over cash on withdrawal (Path A)',
+      'Earns commission on every facilitated tx (on-chain)',
+      'Earns yield on idle bKES float via Save & Earn',
+    ],
+    flows: ['Deposit via Agent', 'Withdrawal', 'Save & Earn'],
+  },
+  merchant: {
+    id: 'merchant', icon: '🛒', name: 'Merchant',
+    sub: '6-digit code · QR payments',
+    tag: 'COMMUNITY', color: 'var(--c-merchant)',
+    layer: 'actors',
+    desc: 'Merchants accept bKES payments via QR code or 6-digit merchant code. Non-custodial wallet. Enterprise merchants use custodial wallets with reconciliation (WIP).',
+    type: 'External Actor',
+    responsibilities: [
+      'Accepts bKES payments from users via QR or code',
+      'Receives instant on-chain settlement',
+      'Earns yield on float via Save & Earn',
+      'Enterprise: full reconciliation via custodial wallet (WIP)',
+    ],
+    flows: ['Merchant Payment', 'Save & Earn'],
+  },
+  mobile: {
+    id: 'mobile', icon: '📱', name: 'Mobile App',
+    sub: 'iOS / Android · Bpesa client',
+    tag: 'CLIENT', color: 'var(--c-mobile)',
+    layer: 'client',
+    desc: 'The Bpesa mobile app. Handles all user interactions, signs meta-transactions, polls the gateway for approved relayers, and manages the failover chain.',
+    type: 'Client Application',
+    responsibilities: [
+      'Polls GET /relayers/approved on init + every 30 minutes',
+      'Sorts relayers by weekly score, routes to highest-scored',
+      'Signs EIP-712 typed payload — user never sees raw addresses',
+      'Failover chain: Primary → Secondary → master.node.bpesa.net',
+      'Refreshes relayer list immediately on tx failure',
+    ],
+    flows: ['Transaction Flow', 'All flows'],
+  },
+  relayer: {
+    id: 'relayer', icon: '📡', name: 'Community Relayer',
+    sub: 'Docker node · relayerN.node.bpesa.net',
+    tag: 'COMMUNITY NODE', color: 'var(--c-relayer)',
+    layer: 'relayers',
+    desc: 'Community-run Docker containers. Anyone can run one. Auto-approved via gateway. Pays ETH gas to forward meta-transactions. Earns ETH reimbursement + stable rewards weekly.',
+    type: 'Infrastructure',
+    responsibilities: [
+      'Receives signed meta-tx from mobile via HTTPS subdomain',
+      'Verifies EIP-712 user signature locally before submission',
+      'Checks tx deadline not expired (5 min window)',
+      'Calls forwardTransaction() on Gateway Contract, pays ETH gas',
+      'Reports tx hash to Bpesa backend for reimbursement tracking',
+      'Exposes /health endpoint with image hash, ETH balance, uptime',
+    ],
+    flows: ['Transaction Flow', 'Relayer Lifecycle'],
+  },
+  master: {
+    id: 'master', icon: '🛡️', name: 'Master Relayer',
+    sub: 'master.node.bpesa.net · Bpesa-operated',
+    tag: 'FALLBACK', color: 'var(--c-master)',
+    layer: 'relayers',
+    desc: 'Bpesa-operated fallback relayer. Always live, never suspended, hardcoded in the mobile app. Last resort when all community relayers are unavailable.',
+    type: 'Infrastructure',
+    responsibilities: [
+      'Always online — never suspended by health monitor',
+      'Hardcoded in mobile app as last-resort fallback',
+      'Funded from Operations Vault (Vault 1) — not a profit center',
+      'Triggers PagerDuty alert if it becomes unhealthy',
+    ],
+    flows: ['Transaction Flow'],
+  },
+  gateway: {
+    id: 'gateway', icon: '📜', name: 'Gateway Contract',
+    sub: 'On-chain · Base Chain · source of truth',
+    tag: 'SMART CONTRACT', color: 'var(--c-gateway)',
+    layer: 'contracts',
+    desc: 'The on-chain source of truth. Stores the approved relayer registry, whitelist, and approved image hashes. Acts as the meta-transaction forwarder and handles fee deduction on every transfer. All approvals and suspensions are written here.',
+    type: 'Smart Contract',
+    responsibilities: [
+      'Stores approved relayer registry — wallet, subdomain, stake, preferences',
+      'Stores approved Docker image hashes (current + grace period)',
+      'forwardTransaction() — verifies user sig, checks relayer whitelist, calls bKES transfer',
+      'Deducts fee on every transfer → sends to Fee Split Contract',
+      'registerRelayer(), approveRelayer(), suspendRelayer(), reinstateRelayer()',
+      'Emits RelayerApproved event → triggers DNS provisioning',
+      'Enforces nonces per user — replay attack prevention',
+    ],
+    flows: ['Transaction Flow', 'Relayer Lifecycle', 'Self-Healing'],
+  },
+  bkes: {
+    id: 'bkes', icon: '🪙', name: 'bKES Contract',
+    sub: 'ERC-20 · Base Chain · blacklist enforced',
+    tag: 'SMART CONTRACT', color: 'var(--c-bkes)',
+    layer: 'contracts',
+    desc: 'Standard ERC-20 stablecoin contract on Base Chain. Handles bKES transfers with on-chain blacklist enforcement. No fee logic — fees are handled by the Gateway Contract. Mint and burn are called directly by the Bpesa Backend after Pretium callbacks.',
+    type: 'Smart Contract',
+    responsibilities: [
+      'Standard ERC-20 transfer with on-chain blacklist enforcement',
+      'Mint: called by Bpesa Backend after Pretium confirms KES deposit',
+      'Burn: called by Bpesa Backend on Path B withdrawal before Pretium disburses',
+      'On-chain blacklist check before every transfer, mint, and burn',
+      'No fee deduction logic — fees handled upstream by Gateway Contract',
+    ],
+    flows: ['Transaction Flow', 'Deposit via M-Pesa', 'Withdrawal', 'bKES↔USDC Swap'],
+  },
+  fee: {
+    id: 'fee', icon: '💰', name: 'Fee Split Contract',
+    sub: 'Atomic distribution · 5 vaults',
+    tag: 'SMART CONTRACT', color: 'var(--c-fee)',
+    layer: 'contracts',
+    desc: 'Receives all protocol fees and atomically distributes to 5 purpose-specific vault contracts. The Keeper calls distributeFees() hourly or when balance exceeds threshold.',
+    type: 'Smart Contract',
+    responsibilities: [
+      'Receives fee on every bKES transfer from bKES contract',
+      'distributeFees() splits: 60% Ops · 20% Liq · 10% Rewards · 5% ETH · 5% Team',
+      'Keeper pays gas for batch distribution (not relayer)',
+      'Emits distribution events for full audit trail',
+      'Team vault enforces Option C: pre/post profitability threshold',
+    ],
+    flows: ['Fee & Vault Split'],
+  },
+  keeper: {
+    id: 'keeper', icon: '⚙️', name: 'Keeper Service',
+    sub: 'Primary + Secondary · Redis lock',
+    tag: 'BACKEND SERVICE', color: 'var(--c-keeper)',
+    layer: 'backend',
+    desc: 'The autonomous brain of the system. Runs 3 continuous loops. Primary/secondary failover via Redis distributed lock. Self-funded from Vault 1. On-chain heartbeat every hour.',
+    type: 'Backend Service',
+    responsibilities: [
+      'Loop 1: Health monitor — pings all relayers every 60s',
+      'Loop 2: Reinstatement — re-checks suspended relayers every 10 min',
+      'Loop 3: Vault monitor — checks vault balances hourly, triggers top-ups',
+      'Calls distributeFees() hourly or on balance threshold',
+      'Executes weekly payout run every Sunday midnight UTC',
+      'Writes on-chain heartbeat every hour for public verifiability',
+      'Primary/secondary failover — max 60s downtime on primary failure',
+    ],
+    flows: ['Keeper System', 'Fee & Vault Split', 'Payout Engine', 'Self-Healing'],
+  },
+  watchdog: {
+    id: 'watchdog', icon: '👁️', name: 'Watchdog',
+    sub: 'Separate server · ultra-lightweight',
+    tag: 'BACKEND SERVICE', color: 'var(--c-watchdog)',
+    layer: 'backend',
+    desc: 'A minimal process running on a separate $5/month VPS. Watches the keeper from outside. Reads on-chain heartbeat, checks keeper ETH, fires PagerDuty if critical.',
+    type: 'Backend Service',
+    responsibilities: [
+      'Reads on-chain keeper heartbeat every 5 minutes',
+      'Checks keeper ETH balance — calls topUpKeeper() if low',
+      'Fires PagerDuty alert if heartbeat > 2 hours old',
+      'Attempts keeper restart via infrastructure API',
+      'Intentionally simple — watches only, does not run keeper logic',
+    ],
+    flows: ['Keeper System', 'Self-Healing'],
+  },
+  backend: {
+    id: 'backend', icon: '🖥️', name: 'Bpesa Backend',
+    sub: 'Protocol layer · orchestration',
+    tag: 'BACKEND SERVICE', color: 'var(--c-gateway)',
+    layer: 'backend',
+    desc: 'The Bpesa Protocol Layer backend service. Handles relayer registration processing, SmileID AML checks, account number resolution, DNS provisioning, and callback handling.',
+    type: 'Backend Service',
+    responsibilities: [
+      'Listens for RelayerRegistered events → runs automated approval checks',
+      'Calls SmileID for PEP/AML/sanctions on users, agents, merchants',
+      'Resolves 10-digit account numbers → wallet addresses',
+      'Provisions DNS subdomains via Cloudflare/Route53 API on relayer approval',
+      'Auto-provisions TLS certs via Let\'s Encrypt',
+      'Receives Pretium callback on KES deposit → calls bKES mint directly',
+      'On Path B withdrawal → calls bKES burn → instructs Pretium to disburse KES',
+      'Routes Path A / Path B on withdrawal requests',
+    ],
+    flows: ['Relayer Lifecycle', 'Transaction Flow', 'All flows'],
+  },
+  vaults: {
+    id: 'vaults', icon: '🏛️', name: 'Treasury Vaults',
+    sub: '5 smart contract vaults on-chain',
+    tag: 'SMART CONTRACTS', color: 'var(--c-vaults)',
+    layer: 'contracts',
+    desc: '5 purpose-specific smart contract vaults. Operations (60%), Liquidity (20%), Relayer Rewards (10%), ETH Reserve (5%), Team/Investors (5%). Keeper manages top-ups and distributions.',
+    type: 'Smart Contracts',
+    responsibilities: [
+      'Vault 1 Operations: funds keeper ETH, master relayer, infra costs',
+      'Vault 2 Liquidity: bKES peg stability and growth capital',
+      'Vault 3 Rewards: weekly relayer reward pool',
+      'Vault 4 ETH Reserve: auto-converted to ETH via LP for reimbursements',
+      'Vault 5 Team: Option C split — 100% treasury pre-profit, 60/40 post-profit',
+      'Vault 6 Keeper: 0.01 ETH target, public topUpKeeper() function',
+    ],
+    flows: ['Fee & Vault Split', 'Payout Engine', 'Keeper System'],
+  },
+  pretium: {
+    id: 'pretium', icon: '🏦', name: 'Pretium / SasaPay',
+    sub: 'Regulated fiat layer · M-Pesa paybill',
+    tag: 'EXTERNAL', color: 'var(--c-pretium)',
+    layer: 'external',
+    desc: 'The regulated fiat on/off-ramp. Bpesa has no direct M-Pesa account — Pretium holds the paybill and SasaPay fiat wallet on behalf of Bpesa. KES settles here before bKES is minted.',
+    type: 'External Partner',
+    responsibilities: [
+      'Holds M-Pesa paybill and SasaPay fiat wallet on behalf of Bpesa',
+      'Triggers STK Push to user phone on deposit request',
+      'Fires callback to Bpesa Backend on KES collection confirmation',
+      'Disburses KES on withdrawal Path B: M-Pesa, Bank, Paybill, Till',
+    ],
+    flows: ['Deposit via M-Pesa', 'Withdrawal'],
+  },
+  lp: {
+    id: 'lp', icon: '💱', name: 'Liquidity Provider',
+    sub: 'FX + ETH conversion partner',
+    tag: 'EXTERNAL', color: 'var(--c-lp)',
+    layer: 'external',
+    desc: 'External LP partner handling FX swaps (bKES↔USDC) and ETH conversion for the ETH Reserve vault. Bpesa is asset-light — LP absorbs FX risk. Bpesa clips the spread.',
+    type: 'External Partner',
+    responsibilities: [
+      'Accepts bKES, delivers USDC to user wallet (bKES↔USDC swap)',
+      'Converts USDC→ETH for Vault 4 ETH Reserve top-ups',
+      'Absorbs FX risk — Bpesa holds no open FX position',
+      'Max 1% slippage tolerance on all conversions',
+    ],
+    flows: ['bKES↔USDC Swap', 'Fee & Vault Split'],
+  },
+  smileid: {
+    id: 'smileid', icon: '🔍', name: 'SmileID',
+    sub: 'Identity · PEP/AML/Sanctions screening',
+    tag: 'EXTERNAL', color: 'var(--c-smileid)',
+    layer: 'external',
+    desc: 'Identity screening layer. Called by Bpesa Backend on user, agent, and merchant actions. Screens for PEP, AML, and sanctions. Separate from on-chain blacklists.',
+    type: 'External Partner',
+    responsibilities: [
+      'PEP / AML / Sanctions check on user identity (not wallet address)',
+      'Called on deposit, transfer, merchant payment, withdrawal, swap',
+      'Identity layer only — on-chain blacklist is separate enforcement',
+      'Bpesa Backend orchestrates all SmileID calls',
+    ],
+    flows: ['All flows (identity screening step)'],
+  },
+  dns: {
+    id: 'dns', icon: '🌐', name: 'DNS Automation',
+    sub: 'Cloudflare/Route53 · auto-provisioned',
+    tag: 'INFRASTRUCTURE', color: 'var(--c-dns)',
+    layer: 'infra',
+    desc: 'Automated DNS management for the relayer subdomain namespace. Triggered by RelayerApproved events. Creates and removes A records and TLS certs without human action.',
+    type: 'Infrastructure',
+    responsibilities: [
+      'Listens for RelayerApproved → creates relayerN.node.bpesa.net A record',
+      'Listens for RelayerSuspended → suspends DNS record (NXDOMAIN)',
+      'Listens for RelayerReinstated → restores DNS record',
+      'Auto-provisions TLS certs via Let\'s Encrypt on every new subdomain',
+      'Bpesa controls node.bpesa.net zone — all subdomains under this namespace',
+    ],
+    flows: ['Relayer Lifecycle'],
+  },
+};
+
+// Edges: [from, to, label, bidirectional?]
+const EDGES = [
+  // User flows
+  ['mobile', 'relayer', 'signed meta-tx', false],
+  ['mobile', 'backend', 'polls approved list', false],
+  ['user', 'mobile', 'initiates tx', false],
+  ['agent', 'mobile', 'cash deposit', false],
+  ['merchant', 'mobile', 'receives payment', true],
+
+  // Relayer → chain
+  ['relayer', 'gateway', 'forwardTransaction()', false],
+  ['master', 'gateway', 'forwardTransaction()', false],
+  ['mobile', 'master', 'fallback', false],
+
+  // Gateway → contracts
+  ['gateway', 'bkes', 'execute transfer', false],
+  ['gateway', 'fee', 'fee deduction', false],
+  ['gateway', 'backend', 'emits events', false],
+
+  // Backend orchestration
+  ['backend', 'smileid', 'AML/PEP check', true],
+  ['backend', 'pretium', 'deposit/withdraw', true],
+  ['backend', 'dns', 'provision subdomain', false],
+  ['backend', 'gateway', 'approve/suspend relayer', false],
+  ['backend', 'keeper', 'orchestrates', true],
+
+  // Keeper
+  ['keeper', 'fee', 'distributeFees()', false],
+  ['keeper', 'vaults', 'monitors + tops up', true],
+  ['keeper', 'gateway', 'health + reinstate', false],
+  ['keeper', 'lp', 'USDC→ETH swap', false],
+  ['watchdog', 'keeper', 'monitors liveness', false],
+  ['watchdog', 'vaults', 'topUpKeeper()', false],
+
+  // Vaults
+  ['fee', 'vaults', 'split to 5 vaults', false],
+  ['vaults', 'relayer', 'weekly ETH reimburse', false],
+  ['vaults', 'keeper', 'funds keeper gas', false],
+
+  // External
+  ['backend', 'bkes', 'mint / burn', false],
+  ['pretium', 'backend', 'deposit callback', false],
+  ['lp', 'bkes', 'USDC↔bKES', true],
+
+  // DNS
+  ['dns', 'relayer', 'subdomain assigned', false],
+];
+
+// Layout positions (as % of canvas)
+const POSITIONS = {
+  // Layer: actors (top)
+  user:     { x: 12, y: 10 },
+  agent:    { x: 28, y: 10 },
+  merchant: { x: 44, y: 10 },
+
+  // Layer: client
+  mobile:   { x: 20, y: 25 },
+
+  // Layer: relayers
+  relayer:  { x: 50, y: 22 },
+  master:   { x: 68, y: 22 },
+
+  // Layer: backend
+  backend:  { x: 20, y: 43 },
+  keeper:   { x: 42, y: 43 },
+  watchdog: { x: 62, y: 43 },
+
+  // Layer: contracts
+  gateway:  { x: 18, y: 63 },
+  bkes:     { x: 36, y: 63 },
+  fee:      { x: 54, y: 63 },
+  vaults:   { x: 72, y: 63 },
+
+  // Layer: external
+  pretium:  { x: 12, y: 81 },
+  lp:       { x: 30, y: 81 },
+  smileid:  { x: 48, y: 81 },
+  dns:      { x: 66, y: 81 },
+};
+
+const LAYER_LABELS = [
+  { y: 4,  label: 'ACTORS & USERS' },
+  { y: 19, label: 'CLIENT APPLICATION' },
+  { y: 36, label: 'BACKEND SERVICES' },
+  { y: 56, label: 'SMART CONTRACTS — BASE CHAIN' },
+  { y: 74, label: 'EXTERNAL INTEGRATIONS' },
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let selectedId = null;
+let canvasW = 0, canvasH = 0;
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+function init() {
+  const wrap = document.getElementById('canvasWrap');
+  canvasW = wrap.offsetWidth;
+  canvasH = wrap.offsetHeight;
+
+  drawLayerBands();
+  drawEdges();
+  drawNodes();
+  startFlowAnimations();
+}
+
+function px(pct, dim) {
+  return (pct / 100) * dim;
+}
+
+// ─────────────────────────────────────────────
+// LAYER BANDS
+// ─────────────────────────────────────────────
+function drawLayerBands() {
+  const wrap = document.getElementById('canvasWrap');
+  LAYER_LABELS.forEach(l => {
+    const band = document.createElement('div');
+    band.className = 'layer-label';
+    band.style.left = '14px';
+    band.style.top = px(l.y, canvasH) + 'px';
+    band.textContent = l.label;
+    wrap.appendChild(band);
+
+    if (l.y > 4) {
+      const line = document.createElement('div');
+      line.className = 'layer-band';
+      line.style.top = px(l.y - 1, canvasH) + 'px';
+      wrap.appendChild(line);
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// EDGES
+// ─────────────────────────────────────────────
+let edgeEls = {};
+
+function getCenter(id) {
+  const pos = POSITIONS[id];
+  return {
+    x: px(pos.x, canvasW),
+    y: px(pos.y, canvasH),
+  };
+}
+
+function drawEdges() {
+  const g = document.getElementById('edgesGroup');
+  g.innerHTML = '';
+  edgeEls = {};
+
+  EDGES.forEach((e, i) => {
+    const [from, to, label, bidir] = e;
+    const a = getCenter(from);
+    const b = getCenter(to);
+
+    // Slight curve
+    const mx = (a.x + b.x) / 2;
+    const my = (a.y + b.y) / 2;
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const offset = Math.min(len * 0.12, 30);
+    const cx = mx - (dy / len) * offset;
+    const cy = my + (dx / len) * offset;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const d = `M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}`;
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'edge');
+    path.setAttribute('marker-end', 'url(#arr-default)');
+    path.dataset.from = from;
+    path.dataset.to = to;
+    path.dataset.idx = i;
+    g.appendChild(path);
+
+    edgeEls[`${from}-${to}`] = path;
+  });
+}
+
+// ─────────────────────────────────────────────
+// FLOW ANIMATIONS
+// ─────────────────────────────────────────────
+function startFlowAnimations() {
+  const dotsG = document.getElementById('dotsGroup');
+  dotsG.innerHTML = '';
+
+  EDGES.forEach((e, i) => {
+    const [from, to] = e;
+    const a = getCenter(from);
+    const b = getCenter(to);
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const offset = Math.min(len * 0.12, 30);
+    const mx = (a.x + b.x) / 2;
+    const my = (a.y + b.y) / 2;
+    const cx = mx - (dy / len) * offset;
+    const cy = my + (dx / len) * offset;
+
+    const pathId = `flow-path-${i}`;
+    const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    pathEl.setAttribute('d', `M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}`);
+    pathEl.setAttribute('id', pathId);
+    pathEl.setAttribute('fill', 'none');
+    pathEl.style.display = 'none';
+    dotsG.appendChild(pathEl);
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('r', '3.5');
+    circle.setAttribute('fill', '#2563eb');
+    circle.style.opacity = '0';
+    circle.dataset.pathId = pathId;
+    circle.dataset.edgeIdx = i;
+    dotsG.appendChild(circle);
+
+    // Animate along path
+    const dur = 1.8 + Math.random() * 1.4;
+    const delay = i * 0.18;
+    animateDot(circle, pathEl, dur, delay);
+  });
+}
+
+function animateDot(circle, pathEl, dur, delay) {
+  let startTime = null;
+  let delayMs = delay * 1000;
+  let durMs = dur * 1000;
+  let waiting = true;
+
+  function frame(ts) {
+    if (!startTime) startTime = ts;
+    const elapsed = ts - startTime;
+
+    if (waiting) {
+      if (elapsed < delayMs) {
+        requestAnimationFrame(frame);
+        return;
+      }
+      waiting = false;
+      startTime = ts;
+    }
+
+    const t = ((ts - startTime) % (durMs * 1.4)) / durMs;
+
+    if (t <= 1) {
+      const pathLen = pathEl.getTotalLength();
+      const pt = pathEl.getPointAtLength(t * pathLen);
+      circle.setAttribute('cx', pt.x);
+      circle.setAttribute('cy', pt.y);
+
+      // fade in/out
+      const alpha = t < 0.05 ? t / 0.05 : t > 0.9 ? (1 - t) / 0.1 : 1;
+      circle.style.opacity = (alpha * 0.55).toString();
+    } else {
+      circle.style.opacity = '0';
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+}
+
+// ─────────────────────────────────────────────
+// NODES
+// ─────────────────────────────────────────────
+let nodeEls = {};
+
+function drawNodes() {
+  const layer = document.getElementById('nodesLayer');
+  layer.innerHTML = '';
+  nodeEls = {};
+
+  Object.values(COMPONENTS).forEach(comp => {
+    const pos = POSITIONS[comp.id];
+    if (!pos) return;
+
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.id = `node-${comp.id}`;
+    node.style.left = px(pos.x, canvasW) + 'px';
+    node.style.top = px(pos.y, canvasH) + 'px';
+    node.style.setProperty('--node-color', comp.color);
+
+    node.innerHTML = `
+      <div class="node-inner">
+        <div class="node-tag">${comp.tag}</div>
+        <span class="node-icon">${comp.icon}</span>
+        <div class="node-name">${comp.name}</div>
+        <div class="node-sub">${comp.sub}</div>
+      </div>
+    `;
+
+    node.addEventListener('click', () => selectNode(comp.id));
+    layer.appendChild(node);
+    nodeEls[comp.id] = node;
+  });
+}
+
+// ─────────────────────────────────────────────
+// SELECTION
+// ─────────────────────────────────────────────
+function selectNode(id) {
+  if (selectedId === id) {
+    resetSelection();
+    return;
+  }
+  selectedId = id;
+
+  // Find connected nodes
+  const connected = new Set();
+  connected.add(id);
+  EDGES.forEach(([from, to]) => {
+    if (from === id) connected.add(to);
+    if (to === id) connected.add(from);
+  });
+
+  // Update nodes
+  Object.keys(nodeEls).forEach(nid => {
+    const el = nodeEls[nid];
+    el.classList.remove('selected', 'dimmed');
+    if (nid === id) el.classList.add('selected');
+    else if (!connected.has(nid)) el.classList.add('dimmed');
+  });
+
+  // Update edges
+  const comp = COMPONENTS[id];
+  document.querySelectorAll('.edge').forEach(edge => {
+    const from = edge.dataset.from;
+    const to = edge.dataset.to;
+    edge.classList.remove('highlighted', 'dimmed');
+    if (from === id || to === id) {
+      edge.classList.add('highlighted');
+      edge.style.stroke = comp.color;
+    } else {
+      edge.classList.add('dimmed');
+      edge.style.stroke = '';
+    }
+  });
+
+  showPanel(id);
+}
+
+function resetSelection() {
+  selectedId = null;
+  Object.values(nodeEls).forEach(el => el.classList.remove('selected', 'dimmed'));
+  document.querySelectorAll('.edge').forEach(e => {
+    e.classList.remove('highlighted', 'dimmed');
+    e.style.stroke = '';
+  });
+  hidePanel();
+}
+
+// ─────────────────────────────────────────────
+// DETAIL PANEL
+// ─────────────────────────────────────────────
+function showPanel(id) {
+  const comp = COMPONENTS[id];
+  const panel = document.getElementById('detailPanel');
+  const content = document.getElementById('panelContent');
+  const empty = document.getElementById('panelEmpty');
+
+  panel.classList.remove('hidden');
+  empty.style.display = 'none';
+
+  // Find connections
+  const incoming = [];
+  const outgoing = [];
+  EDGES.forEach(([from, to, label]) => {
+    if (from === id) outgoing.push({ id: to, label });
+    if (to === id) incoming.push({ id: from, label });
+  });
+
+  content.innerHTML = `
+    <div class="panel-header">
+      <div class="panel-icon">${comp.icon}</div>
+      <div class="panel-name">${comp.name}</div>
+      <div class="panel-type" style="background:${comp.color}15;color:${comp.color};border:1px solid ${comp.color}30">${comp.type}</div>
+      <div class="panel-desc">${comp.desc}</div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Responsibilities</div>
+      ${comp.responsibilities.map(r => `
+        <div class="resp-item">
+          <div class="resp-dot" style="background:${comp.color}"></div>
+          <div class="resp-text">${r}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    ${outgoing.length > 0 ? `
+    <div class="panel-section">
+      <div class="panel-section-title">Sends to</div>
+      ${outgoing.map(c => {
+        const t = COMPONENTS[c.id];
+        return t ? `
+          <div class="conn-item" onclick="selectNode('${c.id}')">
+            <span class="conn-item-icon">${t.icon}</span>
+            <span class="conn-item-name">${t.name}</span>
+            <span class="conn-item-rel">${c.label}</span>
+            <span class="conn-arrow-icon">→</span>
+          </div>` : '';
+      }).join('')}
+    </div>` : ''}
+
+    ${incoming.length > 0 ? `
+    <div class="panel-section">
+      <div class="panel-section-title">Receives from</div>
+      ${incoming.map(c => {
+        const t = COMPONENTS[c.id];
+        return t ? `
+          <div class="conn-item" onclick="selectNode('${c.id}')">
+            <span class="conn-item-icon">${t.icon}</span>
+            <span class="conn-item-name">${t.name}</span>
+            <span class="conn-item-rel">${c.label}</span>
+            <span class="conn-arrow-icon">←</span>
+          </div>` : '';
+      }).join('')}
+    </div>` : ''}
+
+    <div class="panel-section">
+      <div class="panel-section-title">Appears in flows</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">
+        ${comp.flows.map(f => `
+          <span class="flow-tag" style="background:${comp.color}12;color:${comp.color};border-color:${comp.color}30">
+            ${f}
+          </span>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  content.classList.add('active');
+}
+
+function hidePanel() {
+  const panel = document.getElementById('detailPanel');
+  const content = document.getElementById('panelContent');
+  const empty = document.getElementById('panelEmpty');
+  panel.classList.add('hidden');
+  content.classList.remove('active');
+  content.innerHTML = '';
+  empty.style.display = '';
+}
+
+// ─────────────────────────────────────────────
+// RESIZE
+// ─────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  const wrap = document.getElementById('canvasWrap');
+  canvasW = wrap.offsetWidth;
+  canvasH = wrap.offsetHeight;
+  drawLayerBands();
+  drawEdges();
+  drawNodes();
+});
+
+// ─────────────────────────────────────────────
+// START
+// ─────────────────────────────────────────────
+window.addEventListener('load', init);
+</script>
+</body>
+</html>

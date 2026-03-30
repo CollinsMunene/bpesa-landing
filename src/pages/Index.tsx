@@ -1,28 +1,29 @@
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
-import FeaturesSection from "@/components/FeaturesSection";
-import HowItWorksSection from "@/components/HowItWorksSection";
+import OfferingsSection from "@/components/OfferingsSection";
 import AgentNetworkSection from "@/components/AgentNetworkSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
-
+import WhyOpenMoneySection from "@/components/WhyOpenMoneySection";
+import BuildersSection from "@/components/BuildersSection";
+import ComingSoonSection from "@/components/ComingSoonSection";
+import PartnersSection from "@/components/PartnersSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
-import PartnersSection from "@/components/PartnersSection";
 
-const Index = () => {
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
+const Index = () => (
+  <div className="min-h-screen bg-background">
+    <Header />
+    <main>
       <HeroSection />
-      <FeaturesSection />
-      <HowItWorksSection />
+      <OfferingsSection />
       <AgentNetworkSection />
+      <WhyOpenMoneySection />
+      <BuildersSection />
+      <ComingSoonSection />
       <PartnersSection />
-      {/* <TestimonialsSection /> */}
       <CTASection />
-      <Footer />
-    </div>
-  );
-};
+    </main>
+    <Footer />
+  </div>
+);
 
 export default Index;
