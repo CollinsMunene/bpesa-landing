@@ -291,10 +291,6 @@ const PartnerApi = () => (
     "type":              "onramp",
     "grossAmount":       1000,
     "currency":          "KES",
-    "providerFeeAmount": 20,
-    "providerFeeNote":   "2% processing fee",
-    "partnerFeePercent": "1.5",
-    "partnerFeeAmount":  14.7,
     "totalFeeAmount":    34.7,
     "netAmount":         965.3,
     "note": "User pays KES 1000.00. After processing fee, they receive 965.30 bKES."
@@ -309,10 +305,6 @@ const PartnerApi = () => (
     "type":              "offramp",
     "grossAmount":       1000,
     "currency":          "KES",
-    "providerFeeAmount": 12,
-    "providerFeeNote":   "fixed disbursement fee (band-based)",
-    "partnerFeePercent": "1.5",
-    "partnerFeeAmount":  14.82,
     "totalFeeAmount":    26.82,
     "netAmount":         973.18,
     "note": "User receives KES 973.18 on their phone. Total bKES burned: KES 1000.00 equivalent."
@@ -346,23 +338,11 @@ const PartnerApi = () => (
               </Td>
             </tr>
             <tr>
-              <Td>providerFeeAmount</Td>
+              <Td>totalFeeAmount</Td>
               <Td>
                 Network fee - deducted from payment (onramp) or charged on
                 disbursement (offramp)
               </Td>
-            </tr>
-            <tr>
-              <Td>partnerFeeAmount</Td>
-              <Td>
-                Service fee
-                {/* Service fee - minted to your{" "} */}
-                {/* <C>feeCollectionAddress</C> */}
-              </Td>
-            </tr>
-            <tr>
-              <Td>totalFeeAmount</Td>
-              <Td>Sum of both fees</Td>
             </tr>
             <tr>
               <Td>netAmount</Td>
