@@ -9,6 +9,9 @@ import NotFound from "./pages/NotFound";
 import BpesaReserve from "./pages/BpesaReserve";
 import { Web3Provider } from "./providers";
 import TransactionFees from "./pages/TransactionFee";
+import DocsIndex from "./pages/DocsIndex";
+import PartnerApi from "./pages/docs/PartnerApi";
+import PageTracker from "./components/PageTracker";
 
 const queryClient = new QueryClient();
 
@@ -19,11 +22,14 @@ const App = () => (
       <Sonner />
       <Web3Provider>
       <BrowserRouter>
+        <PageTracker />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/download" element={<Download />} />
           <Route path="/transaction_bands" element={<TransactionFees />} />
           <Route path="/superagent/float" element={<BpesaReserve />} />
+          <Route path="/docs" element={<DocsIndex />} />
+          <Route path="/docs/partner-api" element={<PartnerApi />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
